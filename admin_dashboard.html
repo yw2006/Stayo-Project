@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ReserveEase</title>
+    <meta name="description" content="Admin dashboard for managing hotels, rooms, and reservations">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* Same CSS Variables as main site */
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #f8fafc;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --pending-color: #f59e0b;
+            
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            --background-color: var(--white);
+            --surface-color: var(--gray-50);
+            --text-primary: var(--gray-900);
+            --text-secondary: var(--gray-600);
+            --border-color: var(--gray-200);
+            
+            --dark-background: var(--gray-900);
+            --dark-surface: var(--gray-800);
+            --dark-text-primary: var(--white);
+            --dark-text-secondary: var(--gray-300);
+            --dark-border: var(--gray-700);
+            
+            --font-family: 'Inter', sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+            
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --space-16: 4rem;
+            --space-20: 5rem;
+            
+            --radius: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            
+            --z-dropdown: 1000;
+            --z-modal: 2000;
+            --z-notification: 3000;
+        }
+        
+        [data-theme="dark"] {
+            --background-color: var(--dark-background);
+            --surface-color: var(--dark-surface);
+            --text-primary: var(--dark-text-primary);
+            --text-secondary: var(--dark-text-secondary);
+            --border-color: var(--dark-border);
+        }
+        
+        /* Base Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html { scroll-behavior: smooth; height: 100%; }
+        
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--background-color);
+            transition: background-color var(--transition-normal), color var(--transition-normal);
+            min-height: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Dashboard Layout */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--white);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform var(--transition-normal);
+        }
+
+        [data-theme="dark"] .sidebar {
+            background: var(--dark-surface);
+        }
+
+        .sidebar-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .sidebar-brand {
+            font-size: var(--font-size-xl);
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .sidebar-nav {
+            padding: var(--space-4) 0;
+        }
+
+        .nav-item {
+            margin-bottom: var(--space-1);
+            padding: 0 var(--space-4);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) var(--space-4);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background: var(--surface-color);
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: var(--space-4) var(--space-6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        [data-theme="dark"] .top-bar {
+            background: var(--dark-surface);
+        }
+
+        .top-bar-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .theme-toggle {
+            background: var(--surface-color);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-full);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            background: var(--surface-color);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: var(--space-6);
+            background: var(--surface-color);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: transform var(--transition-fast);
+        }
+
+        [data-theme="dark"] .stat-card {
+            background: var(--dark-surface);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xl);
+            color: var(--white);
+        }
+
+        .stat-icon.primary { background: var(--primary-color); }
+        .stat-icon.success { background: var(--success-color); }
+        .stat-icon.warning { background: var(--warning-color); }
+        .stat-icon.danger { background: var(--danger-color); }
+
+        .stat-info h3 {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-1);
+        }
+
+        .stat-info p {
+            font-size: var(--font-size-3xl);
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .table-container {
+            background: var(--dark-surface);
+        }
+
+        .table-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: var(--space-4);
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--surface-color);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        .table tbody tr:hover {
+            background: var(--surface-color);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: var(--font-size-sm);
+            min-height: 40px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: var(--white);
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-300);
+        }
+
+        .btn-sm {
+            padding: var(--space-2) var(--space-3);
+            font-size: var(--font-size-xs);
+            min-height: 32px;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
+        .badge.confirmed {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .badge.rejected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .badge.cancelled {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--gray-600);
+            border: 1px solid var(--gray-400);
+        }
+
+        .badge.completed {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info-color);
+            border: 1px solid var(--info-color);
+        }
+
+        .badge.available {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .badge.fully-booked {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: var(--z-modal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+            padding: var(--space-4);
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--background-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            max-width: 600px;
+            width: 100%;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-color);
+            transform: scale(0.8) translateY(-50px);
+            transition: transform var(--transition-normal);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: var(--space-4);
+        }
+
+        .modal-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--font-size-xl);
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: var(--space-2);
+            border-radius: var(--radius);
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
+            background: var(--surface-color);
+        }
+
+        /* Form */
+        .form-group {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-sm);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: var(--font-size-base);
+            background: var(--background-color);
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: var(--space-6);
+            right: var(--space-6);
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--space-4);
+            box-shadow: var(--shadow-xl);
+            z-index: var(--z-notification);
+            min-width: 300px;
+            max-width: 400px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all var(--transition-normal);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .toast-icon {
+            color: var(--success-color);
+            font-size: var(--font-size-xl);
+        }
+
+        .toast-message {
+            flex: 1;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: var(--space-1);
+            border-radius: var(--radius);
+            transition: all var(--transition-fast);
+        }
+
+        .toast-close:hover {
+            color: var(--text-primary);
+            background: var(--surface-color);
+        }
+
+        /* Grid layouts */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space-2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                padding: var(--space-3) var(--space-4);
+            }
+
+            .content {
+                padding: var(--space-4);
+            }
+        }
+
+        /* Utility classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mb-4 { margin-bottom: var(--space-4); }
+        .mb-6 { margin-bottom: var(--space-6); }
+        .mr-2 { margin-right: var(--space-2); }
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: var(--space-2); }
+        .gap-4 { gap: var(--space-4); }
+    </style>
+</head>
+
+<body data-theme="light">
+    <!-- Admin Dashboard Layout -->
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-hotel" style="color: var(--primary-color); font-size: var(--font-size-2xl);"></i>
+                <span class="sidebar-brand">ReserveEase</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a class="nav-link active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" data-section="bookings">
+                        <i class="fas fa-calendar-check"></i>
+                        Reservations
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" data-section="hotels">
+                        <i class="fas fa-building"></i>
+                        Hotels Management
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" data-section="rooms">
+                        <i class="fas fa-bed"></i>
+                        Room Management
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" data-section="users">
+                        <i class="fas fa-users"></i>
+                        Users Management
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link" data-section="inventory">
+                        <i class="fas fa-boxes"></i>
+                        Inventory Management
+                    </a>
+                </div>
+                <div class="nav-item" style="margin-top: var(--space-8); border-top: 1px solid var(--border-color); padding-top: var(--space-4);">
+<a type="button" class="nav-link" id ="homeLink" href="../test3.html">
+    return to site
+</a>
+
+
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-bar-title" id="pageTitle">Dashboard</div>
+                <div class="top-bar-actions">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Administrator</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content">
+                
+                <!-- Dashboard Section -->
+                <section class="content-section active" id="dashboard-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon primary">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Total Hotels</h3>
+                                    <p id="totalHotels">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon success">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Total Rooms</h3>
+                                    <p id="totalRooms">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon warning">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Pending Reservations</h3>
+                                    <p id="pendingBookings">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon danger">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h3>Total Users</h3>
+                                    <p id="totalUsers">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Bookings -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2 class="table-title">Pending Reservations</h2>
+                            <button class="btn btn-primary" onclick="showSection('bookings')">
+                                <i class="fas fa-eye"></i>
+                                View All
+                            </button>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Guest</th>
+                                    <th>Hotel</th>
+                                    <th>Room</th>
+                                    <th>Dates</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingBookingsTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Bookings Section -->
+                <section class="content-section" id="bookings-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1>Reservations Management</h1>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2 class="table-title">All Reservations</h2>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Guest Info</th>
+                                    <th>Hotel & Room</th>
+                                    <th>Dates</th>
+                                    <th>Guests</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allBookingsTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Hotels Section -->
+                <section class="content-section" id="hotels-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1>Hotels Management</h1>
+                        <button class="btn btn-primary" id="addHotelBtn">
+                            <i class="fas fa-plus"></i>
+                            Add New Hotel
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2 class="table-title">Hotels List</h2>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Location</th>
+                                    <th>Price Range</th>
+                                    <th>Rating</th>
+                                    <th>Reviews</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hotelsTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Rooms Section -->
+                <section class="content-section" id="rooms-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1>Room Management</h1>
+                        <button class="btn btn-primary" id="addRoomBtn">
+                            <i class="fas fa-plus"></i>
+                            Add New Room
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2 class="table-title">Rooms List</h2>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Hotel</th>
+                                    <th>Room Name</th>
+                                    <th>Type</th>
+                                    <th>Price</th>
+                                    <th>Available</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roomsTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section class="content-section" id="users-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1>Users Management</h1>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2 class="table-title">Users List</h2>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Role</th>
+                                    <th>Registered</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Inventory Section -->
+                <section class="content-section" id="inventory-section">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1>Inventory Management</h1>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h2 class="table-title">Room Availability</h2>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Hotel</th>
+                                    <th>Room Type</th>
+                                    <th>Available Count</th>
+                                    <th>Total Capacity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTable">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hotel Modal -->
+    <div class="modal" id="hotelModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="hotelModalTitle">Add New Hotel</h2>
+                <button class="modal-close" id="hotelModalClose">&times;</button>
+            </div>
+            <form id="hotelForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="hotelName" class="form-label">Hotel Name</label>
+                        <input type="text" id="hotelName" class="form-input" placeholder="Enter hotel name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hotelLocation" class="form-label">Location</label>
+                        <input type="text" id="hotelLocation" class="form-input" placeholder="City, Country" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hotelPrice" class="form-label">Base Price</label>
+                        <input type="number" id="hotelPrice" class="form-input" placeholder="Price per night" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hotelRating" class="form-label">Rating</label>
+                        <input type="number" id="hotelRating" class="form-input" min="1" max="5" step="0.1" placeholder="4.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hotelReviews" class="form-label">Reviews Count</label>
+                        <input type="number" id="hotelReviews" class="form-input" placeholder="Number of reviews" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hotelImage" class="form-label">Image URL</label>
+                        <input type="url" id="hotelImage" class="form-input" placeholder="https://example.com/image.jpg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="hotelFeatures" class="form-label">Features (comma separated)</label>
+                    <input type="text" id="hotelFeatures" class="form-input" placeholder="Free WiFi, Pool, Breakfast Included" required>
+                </div>
+                <div class="actions-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Hotel
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('hotelModal')">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Room Modal -->
+    <div class="modal" id="roomModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="roomModalTitle">Add New Room</h2>
+                <button class="modal-close" id="roomModalClose">&times;</button>
+            </div>
+            <form id="roomForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="roomHotel" class="form-label">Hotel</label>
+                        <select id="roomHotel" class="form-input" required>
+                            <option value="">Select Hotel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomName" class="form-label">Room Name</label>
+                        <input type="text" id="roomName" class="form-input" placeholder="Deluxe King Room" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomType" class="form-label">Room Type</label>
+                        <input type="text" id="roomType" class="form-input" placeholder="King Room" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomPrice" class="form-label">Price per Night</label>
+                        <input type="number" id="roomPrice" class="form-input" placeholder="250" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomAvailable" class="form-label">Available Count</label>
+                        <input type="number" id="roomAvailable" class="form-input" placeholder="3" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="roomImage" class="form-label">Image URL</label>
+                        <input type="url" id="roomImage" class="form-input" placeholder="https://example.com/room.jpg" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="roomFeatures" class="form-label">Features (comma separated)</label>
+                    <input type="text" id="roomFeatures" class="form-input" placeholder="King Size Bed, City View, Mini Bar" required>
+                </div>
+                <div class="actions-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Room
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('roomModal')">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <div class="toast-icon" id="toastIcon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="toast-message" id="toastMessage">Operation completed successfully</div>
+            <button class="toast-close" id="toastClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+        // Admin Dashboard Application
+        const AdminApp = {
+            data: {
+                hotels: [],
+                rooms: {},
+                bookings: [],
+                users: []
+            },
+            currentEditId: null,
+            currentEditType: null
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAdminApp();
+        });
+
+        function initializeAdminApp() {
+            initTheme();
+            setupEventListeners();
+            loadDataFromStorage();
+            updateDashboardStats();
+            loadAllTables();
+            populateHotelSelects();
+        }
+
+        // Theme Management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('admin-theme') || 'light';
+            setTheme(savedTheme);
+            
+            document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+        }
+
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('admin-theme', theme);
+            
+            const themeIcon = document.getElementById('themeIcon');
+            if (themeIcon) {
+                themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-link[data-section]').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const section = e.target.closest('.nav-link').getAttribute('data-section');
+                    showSection(section);
+                });
+            });
+
+            // Back to site
+            // document.getElementById('backToSite')?.addEventListener('click', () => {
+            //     if (confirm('Are you sure you want to go back to the main site?')) {
+            //         window.location.href = 'test3.html';
+            //     }
+            // });
+
+            // Modal events
+            document.getElementById('addHotelBtn')?.addEventListener('click', () => openHotelModal());
+            document.getElementById('addRoomBtn')?.addEventListener('click', () => openRoomModal());
+            
+            // Form submissions
+            document.getElementById('hotelForm')?.addEventListener('submit', handleHotelSubmit);
+            document.getElementById('roomForm')?.addEventListener('submit', handleRoomSubmit);
+            
+            // Modal close buttons
+            document.getElementById('hotelModalClose')?.addEventListener('click', () => hideModal('hotelModal'));
+            document.getElementById('roomModalClose')?.addEventListener('click', () => hideModal('roomModal'));
+            
+            // Toast close
+            document.getElementById('toastClose')?.addEventListener('click', () => hideToast());
+            
+            // Close modals on outside click
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    hideModal(e.target.id);
+                }
+            });
+        }
+
+        // Navigation
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section')?.classList.add('active');
+            
+            // Add active class to nav link
+            document.querySelector(`[data-section="${sectionName}"]`)?.classList.add('active');
+            
+            // Update page title
+            const titles = {
+                dashboard: 'Dashboard',
+                bookings: 'Reservations Management',
+                hotels: 'Hotels Management',
+                rooms: 'Room Management',
+                users: 'Users Management',
+                inventory: 'Inventory Management'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
+        }
+
+        // Data Management
+        function loadDataFromStorage() {
+            AdminApp.data.hotels = JSON.parse(localStorage.getItem('hotels') || '[]');
+            AdminApp.data.rooms = JSON.parse(localStorage.getItem('hotelRooms') || '{}');
+            AdminApp.data.bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            AdminApp.data.users = JSON.parse(localStorage.getItem('users') || '[]');
+        }
+
+        function saveDataToStorage() {
+            localStorage.setItem('hotels', JSON.stringify(AdminApp.data.hotels));
+            localStorage.setItem('hotelRooms', JSON.stringify(AdminApp.data.rooms));
+            localStorage.setItem('bookings', JSON.stringify(AdminApp.data.bookings));
+            localStorage.setItem('users', JSON.stringify(AdminApp.data.users));
+        }
+
+        // Dashboard Stats
+        function updateDashboardStats() {
+            const totalHotels = AdminApp.data.hotels.length;
+            const totalRooms = Object.values(AdminApp.data.rooms).reduce((sum, rooms) => sum + rooms.length, 0);
+            const pendingBookings = AdminApp.data.bookings.filter(b => b.status === 'pending').length;
+            const totalUsers = AdminApp.data.users.length;
+            
+            document.getElementById('totalHotels').textContent = totalHotels;
+            document.getElementById('totalRooms').textContent = totalRooms;
+            document.getElementById('pendingBookings').textContent = pendingBookings;
+            document.getElementById('totalUsers').textContent = totalUsers;
+        }
+
+        // Table Loading Functions
+        function loadAllTables() {
+            loadPendingBookingsTable();
+            loadAllBookingsTable();
+            loadHotelsTable();
+            loadRoomsTable();
+            loadUsersTable();
+            loadInventoryTable();
+        }
+
+        function loadPendingBookingsTable() {
+            const tbody = document.getElementById('pendingBookingsTable');
+            if (!tbody) return;
+
+            const pendingBookings = AdminApp.data.bookings.filter(b => b.status === 'pending');
+            
+            if (pendingBookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No pending reservations</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pendingBookings.slice(0, 5).map(booking => {
+                const hotel = AdminApp.data.hotels.find(h => h.id == booking.hotelId);
+                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
+                const user = AdminApp.data.users.find(u => u.id == booking.userId);
+                
+                return `
+                    <tr>
+                        <td>${booking.id}</td>
+                        <td>${user?.name || 'Unknown'}</td>
+                        <td>${hotel?.name || 'Unknown'}</td>
+                        <td>${room?.name || 'Unknown'}</td>
+                        <td>${new Date(booking.checkinDate).toLocaleDateString('en-GB')} - ${new Date(booking.checkoutDate).toLocaleDateString('en-GB')}</td>
+                        <td><span class="badge ${booking.status}">${booking.status}</span></td>
+                        <td>
+                            <button class="btn btn-success btn-sm mr-2" onclick="updateBookingStatus('${booking.id}', 'confirmed')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 'rejected')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadAllBookingsTable() {
+            const tbody = document.getElementById('allBookingsTable');
+            if (!tbody) return;
+
+            if (AdminApp.data.bookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">No reservations found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = AdminApp.data.bookings.map(booking => {
+                const hotel = AdminApp.data.hotels.find(h => h.id == booking.hotelId);
+                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
+                const user = AdminApp.data.users.find(u => u.id == booking.userId);
+                
+                const checkinDate = new Date(booking.checkinDate);
+                const checkoutDate = new Date(booking.checkoutDate);
+                const nights = Math.ceil((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24));
+                const total = booking.pricePerNight * nights;
+                
+                let actions = '';
+                if (booking.status === 'pending') {
+                    actions = `
+                        <button class="btn btn-success btn-sm mr-2" onclick="updateBookingStatus('${booking.id}', 'confirmed')" title="Confirm">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 'rejected')" title="Reject">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                } else if (booking.status === 'confirmed') {
+                    actions = `
+                        <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 'cancelled')" title="Cancel">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    `;
+                }
+                
+                return `
+                    <tr>
+                        <td>${booking.id}</td>
+                        <td>
+                            <strong>${user?.name || 'Unknown'}</strong><br>
+                            <small>${user?.email || 'No email'}</small>
+                        </td>
+                        <td>
+                            <strong>${hotel?.name || 'Unknown'}</strong><br>
+                            <small>${room?.name || 'Unknown'}</small>
+                        </td>
+                        <td>
+                            ${checkinDate.toLocaleDateString('en-GB')}<br>
+                            <small>to ${checkoutDate.toLocaleDateString('en-GB')}</small>
+                        </td>
+                        <td>${booking.guests}</td>
+                        <td>${total}</td>
+                        <td><span class="badge ${booking.status}">${booking.status}</span></td>
+                        <td>${actions}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function loadHotelsTable() {
+            const tbody = document.getElementById('hotelsTable');
+            if (!tbody) return;
+
+            if (AdminApp.data.hotels.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No hotels found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = AdminApp.data.hotels.map(hotel => `
+                <tr>
+                    <td>${hotel.id}</td>
+                    <td><strong>${hotel.name}</strong></td>
+                    <td>${hotel.location}</td>
+                    <td>${hotel.price}</td>
+                    <td>${hotel.rating}/5</td>
+                    <td>${hotel.reviews}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm mr-2" onclick="editHotel(${hotel.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteHotel(${hotel.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadRoomsTable() {
+            const tbody = document.getElementById('roomsTable');
+            if (!tbody) return;
+
+            const allRooms = [];
+            Object.entries(AdminApp.data.rooms).forEach(([hotelId, rooms]) => {
+                const hotel = AdminApp.data.hotels.find(h => h.id == hotelId);
+                rooms.forEach(room => {
+                    allRooms.push({ ...room, hotelName: hotel?.name || 'Unknown', hotelId });
+                });
+            });
+
+            if (allRooms.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No rooms found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = allRooms.map(room => `
+                <tr>
+                    <td>${room.hotelName}</td>
+                    <td><strong>${room.name}</strong></td>
+                    <td>${room.type}</td>
+                    <td>${room.price}</td>
+                    <td>${room.availableCount || 0}</td>
+                    <td><span class="badge ${room.availability}">${room.availability}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm mr-2" onclick="editRoom('${room.hotelId}', ${room.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRoom('${room.hotelId}', ${room.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadUsersTable() {
+            const tbody = document.getElementById('usersTable');
+            if (!tbody) return;
+
+            if (AdminApp.data.users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = AdminApp.data.users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td><strong>${user.name}</strong></td>
+                    <td>${user.email}</td>
+                    <td>${user.phone || 'N/A'}</td>
+                    <td>User</td>
+                    <td>${new Date(user.createdAt || Date.now()).toLocaleDateString('en-GB')}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadInventoryTable() {
+            const tbody = document.getElementById('inventoryTable');
+            if (!tbody) return;
+
+            const inventory = [];
+            Object.entries(AdminApp.data.rooms).forEach(([hotelId, rooms]) => {
+                const hotel = AdminApp.data.hotels.find(h => h.id == hotelId);
+                rooms.forEach(room => {
+                    inventory.push({
+                        hotelName: hotel?.name || 'Unknown',
+                        roomType: room.type,
+                        available: room.availableCount || 0,
+                        total: room.totalCapacity || 5,
+                        status: room.availability,
+                        roomId: room.id,
+                        hotelId: hotelId
+                    });
+                });
+            });
+
+            if (inventory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No inventory data found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = inventory.map(item => `
+                <tr>
+                    <td>${item.hotelName}</td>
+                    <td>${item.roomType}</td>
+                    <td>${item.available}</td>
+                    <td>${item.total}</td>
+                    <td><span class="badge ${item.status}">${item.status}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="updateInventory('${item.hotelId}', ${item.roomId})" title="Update">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Booking Management
+        function updateBookingStatus(bookingId, newStatus) {
+            const booking = AdminApp.data.bookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            const oldStatus = booking.status;
+            booking.status = newStatus;
+
+            // Handle room availability updates
+            if (oldStatus === 'pending' && newStatus === 'confirmed') {
+                // Reduce available room count
+                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
+                if (room) {
+                    room.availableCount = (room.availableCount || 0) - 1;
+                    if (room.availableCount <= 0) {
+                        room.availability = 'fully-booked';
+                    }
+                }
+            } else if (oldStatus === 'confirmed' && newStatus === 'cancelled') {
+                // Restore available room count
+                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
+                if (room) {
+                    room.availableCount = (room.availableCount || 0) + 1;
+                    room.availability = 'available';
+                }
+            }
+
+            saveDataToStorage();
+            updateDashboardStats();
+            loadAllTables();
+            
+            const statusMessages = {
+                confirmed: 'Booking confirmed successfully',
+                rejected: 'Booking rejected',
+                cancelled: 'Booking cancelled'
+            };
+            
+            showToast(statusMessages[newStatus] || 'Status updated', 'success');
+        }
+
+        // Hotel Management
+        function openHotelModal(hotelId = null) {
+            const modal = document.getElementById('hotelModal');
+            const title = document.getElementById('hotelModalTitle');
+            const form = document.getElementById('hotelForm');
+
+            if (hotelId) {
+                // Edit mode
+                const hotel = AdminApp.data.hotels.find(h => h.id === hotelId);
+                if (!hotel) return;
+
+                title.textContent = 'Edit Hotel';
+                AdminApp.currentEditId = hotelId;
+                AdminApp.currentEditType = 'hotel';
+
+                // Populate form
+                document.getElementById('hotelName').value = hotel.name;
+                document.getElementById('hotelLocation').value = hotel.location;
+                document.getElementById('hotelPrice').value = hotel.price;
+                document.getElementById('hotelRating').value = hotel.rating;
+                document.getElementById('hotelReviews').value = hotel.reviews;
+                document.getElementById('hotelImage').value = hotel.image;
+                document.getElementById('hotelFeatures').value = hotel.features.join(', ');
+            } else {
+                // Add mode
+                title.textContent = 'Add New Hotel';
+                AdminApp.currentEditId = null;
+                AdminApp.currentEditType = null;
+                form.reset();
+            }
+
+            showModal('hotelModal');
+        }
+
+        function editHotel(hotelId) {
+            openHotelModal(hotelId);
+        }
+
+        function deleteHotel(hotelId) {
+            if (!confirm('Are you sure you want to delete this hotel? This will also delete all its rooms and affect existing bookings.')) {
+                return;
+            }
+
+            // Remove hotel
+            AdminApp.data.hotels = AdminApp.data.hotels.filter(h => h.id !== hotelId);
+            
+            // Remove hotel rooms
+            delete AdminApp.data.rooms[hotelId];
+            
+            // Update affected bookings
+            AdminApp.data.bookings.forEach(booking => {
+                if (booking.hotelId == hotelId && ['pending', 'confirmed'].includes(booking.status)) {
+                    booking.status = 'cancelled';
+                }
+            });
+
+            saveDataToStorage();
+            updateDashboardStats();
+            loadAllTables();
+            populateHotelSelects();
+            showToast('Hotel deleted successfully', 'success');
+        }
+
+        function handleHotelSubmit(e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('hotelName').value,
+                location: document.getElementById('hotelLocation').value,
+                price: parseInt(document.getElementById('hotelPrice').value),
+                rating: parseFloat(document.getElementById('hotelRating').value),
+                reviews: parseInt(document.getElementById('hotelReviews').value),
+                image: document.getElementById('hotelImage').value,
+                features: document.getElementById('hotelFeatures').value.split(',').map(f => f.trim())
+            };
+
+            if (AdminApp.currentEditId && AdminApp.currentEditType === 'hotel') {
+                // Update existing hotel
+                const hotelIndex = AdminApp.data.hotels.findIndex(h => h.id === AdminApp.currentEditId);
+                if (hotelIndex !== -1) {
+                    AdminApp.data.hotels[hotelIndex] = { ...AdminApp.data.hotels[hotelIndex], ...formData };
+                    showToast('Hotel updated successfully', 'success');
+                }
+            } else {
+                // Add new hotel
+                const newHotel = {
+                    id: Date.now(),
+                    ...formData
+                };
+                AdminApp.data.hotels.push(newHotel);
+                AdminApp.data.rooms[newHotel.id] = []; // Initialize empty rooms array
+                showToast('Hotel added successfully', 'success');
+            }
+
+            saveDataToStorage();
+            updateDashboardStats();
+            loadAllTables();
+            populateHotelSelects();
+            hideModal('hotelModal');
+        }
+
+        // Room Management
+        function openRoomModal(hotelId = null, roomId = null) {
+            const modal = document.getElementById('roomModal');
+            const title = document.getElementById('roomModalTitle');
+            const form = document.getElementById('roomForm');
+
+            if (hotelId && roomId) {
+                // Edit mode
+                const room = AdminApp.data.rooms[hotelId]?.find(r => r.id == roomId);
+                if (!room) return;
+
+                title.textContent = 'Edit Room';
+                AdminApp.currentEditId = roomId;
+                AdminApp.currentEditType = 'room';
+                AdminApp.currentEditHotelId = hotelId;
+
+                // Populate form
+                document.getElementById('roomHotel').value = hotelId;
+                document.getElementById('roomName').value = room.name;
+                document.getElementById('roomType').value = room.type;
+                document.getElementById('roomPrice').value = room.price;
+                document.getElementById('roomAvailable').value = room.availableCount || 0;
+                document.getElementById('roomImage').value = room.image;
+                document.getElementById('roomFeatures').value = room.features.join(', ');
+            } else {
+                // Add mode
+                title.textContent = 'Add New Room';
+                AdminApp.currentEditId = null;
+                AdminApp.currentEditType = null;
+                AdminApp.currentEditHotelId = null;
+                form.reset();
+            }
+
+            showModal('roomModal');
+        }
+
+        function editRoom(hotelId, roomId) {
+            openRoomModal(hotelId, roomId);
+        }
+
+        function deleteRoom(hotelId, roomId) {
+            if (!confirm('Are you sure you want to delete this room? This will affect existing bookings.')) {
+                return;
+            }
+
+            // Remove room
+            AdminApp.data.rooms[hotelId] = AdminApp.data.rooms[hotelId].filter(r => r.id != roomId);
+            
+            // Update affected bookings
+            AdminApp.data.bookings.forEach(booking => {
+                if (booking.hotelId == hotelId && booking.roomId == roomId && ['pending', 'confirmed'].includes(booking.status)) {
+                    booking.status = 'cancelled';
+                }
+            });
+
+            saveDataToStorage();
+            updateDashboardStats();
+            loadAllTables();
+            showToast('Room deleted successfully', 'success');
+        }
+
+        function handleRoomSubmit(e) {
+            e.preventDefault();
+
+            const hotelId = document.getElementById('roomHotel').value;
+            const formData = {
+                name: document.getElementById('roomName').value,
+                type: document.getElementById('roomType').value,
+                price: parseInt(document.getElementById('roomPrice').value),
+                availableCount: parseInt(document.getElementById('roomAvailable').value),
+                image: document.getElementById('roomImage').value,
+                features: document.getElementById('roomFeatures').value.split(',').map(f => f.trim())
+            };
+
+            // Set availability based on count
+            formData.availability = formData.availableCount > 0 ? 'available' : 'fully-booked';
+            formData.totalCapacity = formData.availableCount + 2; // Set total capacity
+
+            if (AdminApp.currentEditId && AdminApp.currentEditType === 'room') {
+                // Update existing room
+                const roomIndex = AdminApp.data.rooms[AdminApp.currentEditHotelId].findIndex(r => r.id == AdminApp.currentEditId);
+                if (roomIndex !== -1) {
+                    AdminApp.data.rooms[AdminApp.currentEditHotelId][roomIndex] = { 
+                        ...AdminApp.data.rooms[AdminApp.currentEditHotelId][roomIndex], 
+                        ...formData 
+                    };
+                    showToast('Room updated successfully', 'success');
+                }
+            } else {
+                // Add new room
+                const newRoom = {
+                    id: Date.now(),
+                    number: String(Date.now()).slice(-3), // Last 3 digits as room number
+                    ...formData
+                };
+
+                if (!AdminApp.data.rooms[hotelId]) {
+                    AdminApp.data.rooms[hotelId] = [];
+                }
+                AdminApp.data.rooms[hotelId].push(newRoom);
+                showToast('Room added successfully', 'success');
+            }
+
+            saveDataToStorage();
+            updateDashboardStats();
+            loadAllTables();
+            hideModal('roomModal');
+        }
+
+        // User Management
+        function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user? This will affect their bookings.')) {
+                return;
+            }
+
+            // Remove user
+            AdminApp.data.users = AdminApp.data.users.filter(u => u.id != userId);
+            
+            // Update affected bookings
+            AdminApp.data.bookings.forEach(booking => {
+                if (booking.userId == userId && ['pending', 'confirmed'].includes(booking.status)) {
+                    booking.status = 'cancelled';
+                }
+            });
+
+            saveDataToStorage();
+            updateDashboardStats();
+            loadAllTables();
+            showToast('User deleted successfully', 'success');
+        }
+
+        // Inventory Management
+        function updateInventory(hotelId, roomId) {
+            const newCount = prompt('Enter new available room count:');
+            if (newCount === null) return;
+
+            const count = parseInt(newCount);
+            if (isNaN(count) || count < 0) {
+                showToast('Please enter a valid number', 'error');
+                return;
+            }
+
+            const room = AdminApp.data.rooms[hotelId]?.find(r => r.id == roomId);
+            if (room) {
+                room.availableCount = count;
+                room.availability = count > 0 ? 'available' : 'fully-booked';
+                
+                saveDataToStorage();
+                loadAllTables();
+                showToast('Inventory updated successfully', 'success');
+            }
+        }
+
+        // Utility Functions
+        function populateHotelSelects() {
+            const selects = document.querySelectorAll('#roomHotel');
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">Select Hotel</option>';
+                
+                AdminApp.data.hotels.forEach(hotel => {
+                    const option = document.createElement('option');
+                    option.value = hotel.id;
+                    option.textContent = hotel.name;
+                    if (hotel.id == currentValue) option.selected = true;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            if (!toast || !toastMessage || !toastIcon) return;
+
+            toastMessage.textContent = message;
+
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+
+            toastIcon.innerHTML = `<i class="${icons[type] || icons.success}"></i>`;
+            
+            // Change toast icon color based on type
+            const colors = {
+                success: 'var(--success-color)',
+                error: 'var(--danger-color)',
+                warning: 'var(--warning-color)',
+                info: 'var(--info-color)'
+            };
+            toastIcon.style.color = colors[type] || colors.success;
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast')?.classList.remove('show');
+        }
+
+        // Initialize with mock data if none exists
+        function initializeMockData() {
+            if (AdminApp.data.hotels.length === 0) {
+                // Add sample data
+                AdminApp.data.hotels = [
+                    {
+                        id: 1,
+                        name: 'The Ritz Carlton',
+                        location: 'Cairo, Egypt',
+                        price: 250,
+                        rating: 4.8,
+                        reviews: 324,
+                        image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                        features: ['Free WiFi', 'Pool', 'Breakfast Included', 'Parking']
+                    },
+                    {
+                        id: 2,
+                        name: 'Four Seasons Hotel',
+                        location: 'Dubai, UAE',
+                        price: 180,
+                        rating: 4.6,
+                        reviews: 198,
+                        image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+                        features: ['Spa', 'Private Beach', 'Multiple Restaurants', 'Room Service']
+                    }
+                ];
+
+                AdminApp.data.rooms = {
+                    1: [
+                        {
+                            id: 101,
+                            name: "Deluxe King Room",
+                            number: "101",
+                            type: "King Room",
+                            price: 250,
+                            availability: "available",
+                            availableCount: 3,
+                            totalCapacity: 5,
+                            image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+                            features: ["King Size Bed", "City View", "Mini Bar", "Free WiFi", "Air Conditioning"]
+                        }
+                    ],
+                    2: [
+                        {
+                            id: 201,
+                            name: "Ocean View Room",
+                            number: "201",
+                            type: "Ocean View",
+                            price: 180,
+                            availability: "available",
+                            availableCount: 2,
+                            totalCapacity: 4,
+                            image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+                            features: ["Ocean View", "Balcony", "Private Beach Access", "Mini Bar", "Free WiFi"]
+                        }
+                    ]
+                };
+
+                AdminApp.data.bookings = [
+                    {
+                        id: 'booking-1',
+                        userId: 1001,
+                        hotelId: 1,
+                        roomId: 101,
+                        checkinDate: '2025-02-15',
+                        checkoutDate: '2025-02-20',
+                        guests: '2',
+                        notes: 'Late check-in expected',
+                        status: 'pending',
+                        pricePerNight: 250,
+                        createdAt: '2025-01-15T10:00:00.000Z'
+                    },
+                    {
+                        id: 'booking-2',
+                        userId: 1002,
+                        hotelId: 2,
+                        roomId: 201,
+                        checkinDate: '2025-03-01',
+                        checkoutDate: '2025-03-05',
+                        guests: '2',
+                        notes: '',
+                        status: 'confirmed',
+                        pricePerNight: 180,
+                        createdAt: '2025-01-10T14:30:00.000Z'
+                    }
+                ];
+
+                AdminApp.data.users = [
+                    {
+                        id: 1001,
+                        name: 'John Smith',
+                        email: 'john.smith@example.com',
+                        phone: '+1234567890',
+                        createdAt: '2025-01-01T10:00:00.000Z'
+                    },
+                    {
+                        id: 1002,
+                        name: 'Sarah Johnson',
+                        email: 'sarah.johnson@example.com',
+                        phone: '+1987654321',
+                        createdAt: '2025-01-05T14:30:00.000Z'
+                    }
+                ];
+
+                saveDataToStorage();
+            }
+        }
+
+        // Load data from main site localStorage if available
+        function syncWithMainSite() {
+            try {
+                const mainSiteHotels = JSON.parse(localStorage.getItem('hotels') || '[]');
+                const mainSiteRooms = JSON.parse(localStorage.getItem('hotelRooms') || '{}');
+                const mainSiteBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                const mainSiteUsers = JSON.parse(localStorage.getItem('users') || '[]');
+
+                if (mainSiteHotels.length > 0) AdminApp.data.hotels = mainSiteHotels;
+                if (Object.keys(mainSiteRooms).length > 0) AdminApp.data.rooms = mainSiteRooms;
+                if (mainSiteBookings.length > 0) AdminApp.data.bookings = mainSiteBookings;
+                if (mainSiteUsers.length > 0) AdminApp.data.users = mainSiteUsers;
+
+                saveDataToStorage();
+            } catch (error) {
+                console.log('No main site data found, using mock data');
+                initializeMockData();
+            }
+        }
+
+        // Override loadDataFromStorage to sync with main site first
+        function loadDataFromStorage() {
+            syncWithMainSite();
+            
+            // Then load from admin storage if exists
+            const adminHotels = JSON.parse(localStorage.getItem('admin-hotels') || 'null');
+            const adminRooms = JSON.parse(localStorage.getItem('admin-rooms') || 'null');
+            const adminBookings = JSON.parse(localStorage.getItem('admin-bookings') || 'null');
+            const adminUsers = JSON.parse(localStorage.getItem('admin-users') || 'null');
+
+            if (adminHotels) AdminApp.data.hotels = adminHotels;
+            if (adminRooms) AdminApp.data.rooms = adminRooms;
+            if (adminBookings) AdminApp.data.bookings = adminBookings;
+            if (adminUsers) AdminApp.data.users = adminUsers;
+
+            // If no data at all, initialize with mock data
+            if (AdminApp.data.hotels.length === 0) {
+                initializeMockData();
+            }
+        }
+
+        // Override saveDataToStorage to save to both admin and main site
+        function saveDataToStorage() {
+            // Save to admin storage
+            localStorage.setItem('admin-hotels', JSON.stringify(AdminApp.data.hotels));
+            localStorage.setItem('admin-rooms', JSON.stringify(AdminApp.data.rooms));
+            localStorage.setItem('admin-bookings', JSON.stringify(AdminApp.data.bookings));
+            localStorage.setItem('admin-users', JSON.stringify(AdminApp.data.users));
+
+            // Sync back to main site storage
+            localStorage.setItem('hotels', JSON.stringify(AdminApp.data.hotels));
+            localStorage.setItem('hotelRooms', JSON.stringify(AdminApp.data.rooms));
+            localStorage.setItem('bookings', JSON.stringify(AdminApp.data.bookings));
+            localStorage.setItem('users', JSON.stringify(AdminApp.data.users));
+        }
+
+        console.log('🔧 Admin Dashboard initialized successfully!');
+        console.log('📊 Features: Hotel/Room/User Management, Booking Approvals, Inventory Control');
+    </script>
+
+</body>
+</html>
