@@ -1055,7 +1055,6 @@
                                     <th>Phone</th>
                                     <th>Role</th>
                                     <th>Registered</th>
-                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTable">
@@ -1253,7 +1252,8 @@
                 hotels: [],
                 rooms: {},
                 bookings: [],
-                users: []
+                admins: [],
+                usercount: 0
             },
             currentEditId: null,
             currentEditType: null
@@ -1376,7 +1376,7 @@
                     token = await refreshAccessToken();
                 }
 
-                const [hotelsRes, roomsRes, bookingsRes, usersRes] = await Promise.all([
+                const [hotelsRes, roomsRes, bookingsRes, adminsRes, userCountRes] = await Promise.all([
                     fetch("http://localhost:5134/api/Hotels"),
                     fetch("http://localhost:5134/api/Rooms"),
                     fetch("http://localhost:5134/api/admin/bookings", {
@@ -1393,12 +1393,21 @@
                             "Authorization": "Bearer " + token
                         }
                     }),
+                    fetch("http://localhost:5134/api/User/usercount", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        }
+                    })
                 ]);
 
                 AdminApp.data.hotels = await hotelsRes.json();
                 AdminApp.data.rooms = await roomsRes.json();
                 AdminApp.data.bookings = await bookingsRes.json();
-                AdminApp.data.users = await usersRes.json();
+                AdminApp.data.admins = await adminsRes.json();
+                const {count} = await userCountRes.json();
+                AdminApp.data.usercount = count;
 
                 // Once loaded, update the UI
                 updateDashboardStats();
@@ -1427,10 +1436,7 @@
                 ? AdminApp.data.bookings.filter(b => b.status === 1).length
                 : 0;
 
-            // total users → API should be an array
-            const totalUsers = Array.isArray(AdminApp.data.users)
-                ? AdminApp.data.users.length
-                : 0;
+            const totalUsers = AdminApp.data.usercount ?? 0;
 
             document.getElementById('totalHotels').textContent = totalHotels;
             document.getElementById('totalRooms').textContent = totalRooms;
@@ -1702,12 +1708,12 @@
             const tbody = document.getElementById('usersTable');
             if (!tbody) return;
 
-            if (AdminApp.data.users.length === 0) {
+            if (AdminApp.data.admins.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = AdminApp.data.users.map(user => `
+            tbody.innerHTML = AdminApp.data.admins.map(user => `
                 <tr>
                     <td>${user.id}</td>
                     <td><strong>${user.username}</strong></td>
@@ -1715,11 +1721,6 @@
                     <td>${user.phone || 'N/A'}</td>
                     <td>User</td>
                     <td>${new Date(user.createdAt || Date.now()).toLocaleDateString('en-GB')}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
                 </tr>
             `).join('');
         }
@@ -2112,7 +2113,7 @@
             }
 
             // Remove user
-            AdminApp.data.users = AdminApp.data.users.filter(u => u.id != userId);
+            AdminApp.data.admins = AdminApp.data.admins.filter(u => u.id != userId);
 
             // Update affected bookings
             AdminApp.data.bookings.forEach(booking => {
