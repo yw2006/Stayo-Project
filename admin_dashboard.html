@@ -1200,7 +1200,60 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+        // --- Token Management for Admin Dashboard ---
+
+        function getAccessToken() {
+            return localStorage.getItem("access_token");
+        }
+
+        function getRefreshToken() {
+            return localStorage.getItem("refresh_token");
+        }
+
+        async function refreshAccessToken() {
+            const refreshToken = getRefreshToken();
+            if (!refreshToken) {
+                console.warn("⚠️ No refresh token found, need login.");
+                return null;
+            }
+
+            try {
+                const response = await fetch("http://localhost:5134/api/Auth/refresh-token", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({refreshToken})
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem("access_token", data.result.accessToken);
+                    localStorage.setItem("refresh_token", data.result.refreshToken);
+                    return data.result.accessToken;
+                } else {
+                    console.error("❌ Failed to refresh access token in Admin Dashboard");
+                    return null;
+                }
+            } catch (err) {
+                console.error("⚠️ Refresh error:", err.message);
+                return null;
+            }
+        }
+
+        function startRefreshScheduler() {
+            setInterval(refreshAccessToken, 10 * 60 * 1000); // every 10 mins
+        }
+
+        // --- On page load, auto-refresh token if available ---
+        document.addEventListener("DOMContentLoaded", async () => {
+            if (getRefreshToken()) {
+                await refreshAccessToken();   // refresh once immediately
+                startRefreshScheduler();      // schedule automatic refresh
+            } else {
+                console.warn("⚠️ No tokens in localStorage. Please login first.");
+            }
+        });
 
         // Admin Dashboard Application
         const AdminApp = {
@@ -1326,13 +1379,26 @@
         // Data Management
         async function loadData() {
             try {
-                const [hotelsRes, roomsRes] = await Promise.all([
+                let workingToken = getAccessToken();
+                if (!workingToken) {
+                    workingToken = await refreshAccessToken();
+                }
+
+                const [hotelsRes, roomsRes, bookingsRes] = await Promise.all([
                     fetch("http://localhost:5134/api/Hotels"),
-                    fetch("http://localhost:5134/api/Rooms")]);
+                    fetch("http://localhost:5134/api/Rooms"),
+                    fetch("http://localhost:5134/api/admin/bookings?status=CONFIRMED", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + workingToken
+                        }
+                    })
+                ]);
 
                 AdminApp.data.hotels = await hotelsRes.json();
                 AdminApp.data.rooms = await roomsRes.json();
-                // AdminApp.data.bookings = await bookingsRes.json();
+                AdminApp.data.bookings = await bookingsRes.json();
                 // AdminApp.data.users = JSON.parse(localStorage.getItem('users') || '[]');
 
                 // Once loaded, update the UI
@@ -1375,11 +1441,21 @@
             loadInventoryTable();
         }
 
+        // 🔑 Map numeric enum values → lowercase text
+        const statusMap = {
+            1: "pending",
+            2: "confirmed",
+            3: "rejected",
+            4: "cancelled",
+            5: "completed"
+        };
+
         function loadPendingBookingsTable() {
             const tbody = document.getElementById('pendingBookingsTable');
             if (!tbody) return;
 
-            const pendingBookings = AdminApp.data.bookings.filter(b => b.status === 'pending');
+            // Collect only pending bookings
+            const pendingBookings = (AdminApp.data.bookings || []).filter(b => statusMap[b.status] === "pending");
 
             if (pendingBookings.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center">No pending reservations</td></tr>';
@@ -1387,28 +1463,30 @@
             }
 
             tbody.innerHTML = pendingBookings.slice(0, 5).map(booking => {
-                const hotel = AdminApp.data.hotels.find(h => h.id == booking.hotelId);
-                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
-                const user = AdminApp.data.users.find(u => u.id == booking.userId);
+                const checkinDate = booking.checkIn ? new Date(booking.checkIn) : null;
+                const checkoutDate = booking.checkOut ? new Date(booking.checkOut) : null;
 
                 return `
-                    <tr>
-                        <td>${booking.id}</td>
-                        <td>${user?.name || 'Unknown'}</td>
-                        <td>${hotel?.name || 'Unknown'}</td>
-                        <td>${room?.name || 'Unknown'}</td>
-                        <td>${new Date(booking.checkinDate).toLocaleDateString('en-GB')} - ${new Date(booking.checkoutDate).toLocaleDateString('en-GB')}</td>
-                        <td><span class="badge ${booking.status}">${booking.status}</span></td>
-                        <td>
-                            <button class="btn btn-success btn-sm mr-2" onclick="updateBookingStatus('${booking.id}', 'confirmed')">
-                                <i class="fas fa-check"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 'rejected')">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td>${booking.id}</td>
+                <td>${booking.userId}</td>
+                <td>${booking.hotel?.name || 'Unknown'}</td>
+                <td>${booking.room?.name || 'Unknown'}</td>
+                <td>
+                  ${checkinDate ? checkinDate.toLocaleDateString('en-GB') : '-'} -
+                  ${checkoutDate ? checkoutDate.toLocaleDateString('en-GB') : '-'}
+                </td>
+                <td><span class="badge pending">Pending</span></td>
+                <td>
+                    <button class="btn btn-success btn-sm mr-2" onclick="updateBookingStatus('${booking.id}', 2)">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 3)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
             }).join('');
         }
 
@@ -1416,60 +1494,66 @@
             const tbody = document.getElementById('allBookingsTable');
             if (!tbody) return;
 
-            if (AdminApp.data.bookings.length === 0) {
+            const bookingsList = AdminApp.data.bookings || [];
+            if (bookingsList.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center">No reservations found</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = AdminApp.data.bookings.map(booking => {
-                const hotel = AdminApp.data.hotels.find(h => h.id == booking.hotelId);
-                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
-                const user = AdminApp.data.users.find(u => u.id == booking.userId);
+            tbody.innerHTML = bookingsList.map(booking => {
+                const checkinDate = booking.checkIn ? new Date(booking.checkIn) : null;
+                const checkoutDate = booking.checkOut ? new Date(booking.checkOut) : null;
+                const nights = booking.nights ?? (
+                    checkinDate && checkoutDate
+                        ? Math.ceil((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24))
+                        : 0
+                );
+                const total = booking.totalPrice ?? (booking.room?.basePrice * nights) ?? 0;
 
-                const checkinDate = new Date(booking.checkinDate);
-                const checkoutDate = new Date(booking.checkoutDate);
-                const nights = Math.ceil((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24));
-                const total = booking.pricePerNight * nights;
+                // convert enum → string
+                const statusText = statusMap[booking.status] || "unknown";
 
                 let actions = '';
-                if (booking.status === 'pending') {
+                if (statusText === "pending") {
                     actions = `
-                        <button class="btn btn-success btn-sm mr-2" onclick="updateBookingStatus('${booking.id}', 'confirmed')" title="Confirm">
-                            <i class="fas fa-check"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 'rejected')" title="Reject">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-                } else if (booking.status === 'confirmed') {
+                <button class="btn btn-success btn-sm mr-2" 
+                        onclick="updateBookingStatus('${booking.id}', 2)" title="Confirm">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" 
+                        onclick="updateBookingStatus('${booking.id}', 3)" title="Reject">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+                } else if (statusText === "confirmed") {
                     actions = `
-                        <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 'cancelled')" title="Cancel">
-                            <i class="fas fa-ban"></i>
-                        </button>
-                    `;
+                <button class="btn btn-danger btn-sm" 
+                        onclick="updateBookingStatus('${booking.id}', 4)" title="Cancel">
+                    <i class="fas fa-ban"></i>
+                </button>
+            `;
                 }
 
                 return `
-                    <tr>
-                        <td>${booking.id}</td>
-                        <td>
-                            <strong>${user?.name || 'Unknown'}</strong><br>
-                            <small>${user?.email || 'No email'}</small>
-                        </td>
-                        <td>
-                            <strong>${hotel?.name || 'Unknown'}</strong><br>
-                            <small>${room?.name || 'Unknown'}</small>
-                        </td>
-                        <td>
-                            ${checkinDate.toLocaleDateString('en-GB')}<br>
-                            <small>to ${checkoutDate.toLocaleDateString('en-GB')}</small>
-                        </td>
-                        <td>${booking.guests}</td>
-                        <td>${total}</td>
-                        <td><span class="badge ${booking.status}">${booking.status}</span></td>
-                        <td>${actions}</td>
-                    </tr>
-                `;
+            <tr>
+                <td>${booking.id}</td>
+                <td>
+                    <strong>${booking.userId}</strong>
+                </td>
+                <td>
+                    <strong>${booking.hotel?.name || 'Unknown'}</strong><br>
+                    <small>${booking.room?.name || 'Unknown'}</small>
+                </td>
+                <td>
+                  ${checkinDate ? checkinDate.toLocaleDateString('en-GB') : '-'}<br>
+                  <small>${checkoutDate ? "to " + checkoutDate.toLocaleDateString('en-GB') : ''}</small>
+                </td>
+                <td>${booking.guests || '-'}</td>
+                <td>${total}</td>
+                <td><span class="badge ${statusText}">${statusText}</span></td>
+                <td>${actions}</td>
+            </tr>
+        `;
             }).join('');
         }
 
