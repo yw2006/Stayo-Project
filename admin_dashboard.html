@@ -774,6 +774,29 @@
         .gap-4 {
             gap: var(--space-4);
         }
+
+        .image-status {
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-status.has-image {
+            background: rgba(16, 185, 129, 0.1);
+            /* green bg */
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .image-status.no-image {
+            background: rgba(239, 68, 68, 0.1);
+            /* red bg */
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
     </style>
 </head>
 
@@ -816,12 +839,6 @@
                     <a class="nav-link" data-section="users">
                         <i class="fas fa-users"></i>
                         Users Management
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a class="nav-link" data-section="inventory">
-                        <i class="fas fa-boxes"></i>
-                        Inventory Management
                     </a>
                 </div>
                 <div class="nav-item"
@@ -923,7 +940,6 @@
                                     <th>Booking ID</th>
                                     <th>Guest</th>
                                     <th>Hotel</th>
-                                    <th>Room</th>
                                     <th>Dates</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -949,7 +965,6 @@
                                     <th>Guest Info</th>
                                     <th>Hotel & Room</th>
                                     <th>Dates</th>
-                                    <th>Guests</th>
                                     <th>Total</th>
                                     <th>Status</th>
                                     <th>Actions</th>
@@ -1049,30 +1064,6 @@
                         </table>
                     </div>
                 </section>
-
-                <!-- Inventory Section -->
-                <section class="content-section" id="inventory-section">
-                    <div class="table-container">
-                        <div class="table-header">
-                            <h2 class="table-title">Room Availability</h2>
-                        </div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Hotel</th>
-                                    <th>Room Type</th>
-                                    <th>Available Count</th>
-                                    <th>Total Capacity</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryTable">
-                                <!-- Populated by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
             </div>
         </main>
     </div>
@@ -1084,45 +1075,42 @@
                 <h2 class="modal-title" id="hotelModalTitle">Add New Hotel</h2>
                 <button class="modal-close" id="hotelModalClose">&times;</button>
             </div>
-            <form id="hotelForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="hotelName" class="form-label">Hotel Name</label>
-                        <input type="text" id="hotelName" class="form-input" placeholder="Enter hotel name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="hotelLocation" class="form-label">Location</label>
-                        <input type="text" id="hotelLocation" class="form-input" placeholder="City, Country" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="hotelPrice" class="form-label">Base Price</label>
-                        <input type="number" id="hotelPrice" class="form-input" placeholder="Price per night" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="hotelRating" class="form-label">Rating</label>
-                        <input type="number" id="hotelRating" class="form-input" min="1" max="5" step="0.1"
-                            placeholder="4.5" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="hotelReviews" class="form-label">Reviews Count</label>
-                        <input type="number" id="hotelReviews" class="form-input" placeholder="Number of reviews"
-                            required>
-                    </div>
-                    <div class="form-group">
-                        <label for="hotelImage" class="form-label">Image URL</label>
-                        <input type="url" id="hotelImage" class="form-input" placeholder="https://example.com/image.jpg"
-                            required>
-                    </div>
-                </div>
+
+            <form id="hotelForm" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="hotelFeatures" class="form-label">Features (comma separated)</label>
-                    <input type="text" id="hotelFeatures" class="form-input"
-                        placeholder="Free WiFi, Pool, Breakfast Included" required>
+                    <label for="hotelName" class="form-label">Name</label>
+                    <input type="text" id="hotelName" class="form-input" required />
                 </div>
+
+                <div class="form-group">
+                    <label for="hotelCity" class="form-label">City</label>
+                    <input type="text" id="hotelCity" class="form-input" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="hotelAddress" class="form-label">Address</label>
+                    <input type="text" id="hotelAddress" class="form-input" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="hotelDescription" class="form-label">Description</label>
+                    <textarea id="hotelDescription" class="form-input"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="hotelImage" class="form-label">Image</label>
+
+                    <!-- Styled status line -->
+                    <div id="hotelImageStatus" class="image-status mb-4"></div>
+
+                    <!-- File input -->
+                    <input type="file" id="hotelImage" class="form-input" accept="image/*" />
+                </div>
+
+                <!-- Actions -->
                 <div class="actions-grid">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
-                        Save Hotel
+                        <i class="fas fa-save"></i> Save Hotel
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="hideModal('hotelModal')">
                         Cancel
@@ -1140,44 +1128,48 @@
                 <button class="modal-close" id="roomModalClose">&times;</button>
             </div>
             <form id="roomForm">
+                <!-- Hotel (full width) -->
+                <div class="form-group">
+                    <label for="roomHotel" class="form-label">Hotel</label>
+                    <select id="roomHotel" class="form-input" required style="width: 100%">
+                        <option value="">Select Hotel</option>
+                        <!-- populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Grid for type + price -->
                 <div class="form-grid">
-                    <div class="form-group">
-                        <label for="roomHotel" class="form-label">Hotel</label>
-                        <select id="roomHotel" class="form-input" required>
-                            <option value="">Select Hotel</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="roomName" class="form-label">Room Name</label>
-                        <input type="text" id="roomName" class="form-input" placeholder="Deluxe King Room" required>
-                    </div>
+                    <!-- Room Type -->
                     <div class="form-group">
                         <label for="roomType" class="form-label">Room Type</label>
-                        <input type="text" id="roomType" class="form-input" placeholder="King Room" required>
+                        <select id="roomType" class="form-input" required>
+                            <option value="1">Deluxe</option>
+                            <option value="2">Suite</option>
+                            <option value="3">Standard</option>
+                            <option value="4">Family</option>
+                            <option value="5">Single</option>
+                            <option value="6">Double</option>
+                        </select>
                     </div>
+
+                    <!-- Price -->
                     <div class="form-group">
                         <label for="roomPrice" class="form-label">Price per Night</label>
-                        <input type="number" id="roomPrice" class="form-input" placeholder="250" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="roomAvailable" class="form-label">Available Count</label>
-                        <input type="number" id="roomAvailable" class="form-input" placeholder="3" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="roomImage" class="form-label">Image URL</label>
-                        <input type="url" id="roomImage" class="form-input" placeholder="https://example.com/room.jpg"
-                            required>
+                        <input type="number" id="roomPrice" class="form-input" placeholder="250" required />
                     </div>
                 </div>
+
+                <!-- Description -->
                 <div class="form-group">
-                    <label for="roomFeatures" class="form-label">Features (comma separated)</label>
-                    <input type="text" id="roomFeatures" class="form-input"
-                        placeholder="King Size Bed, City View, Mini Bar" required>
+                    <label for="roomDescription" class="form-label">Description</label>
+                    <textarea id="roomDescription" class="form-input"
+                        placeholder="Room details, features..."></textarea>
                 </div>
+
+                <!-- Actions -->
                 <div class="actions-grid">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i>
-                        Save Room
+                        <i class="fas fa-save"></i> Save Room
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="hideModal('roomModal')">
                         Cancel
@@ -1379,27 +1371,34 @@
         // Data Management
         async function loadData() {
             try {
-                let workingToken = getAccessToken();
-                if (!workingToken) {
-                    workingToken = await refreshAccessToken();
+                let token = getAccessToken();
+                if (!token) {
+                    token = await refreshAccessToken();
                 }
 
-                const [hotelsRes, roomsRes, bookingsRes] = await Promise.all([
+                const [hotelsRes, roomsRes, bookingsRes, usersRes] = await Promise.all([
                     fetch("http://localhost:5134/api/Hotels"),
                     fetch("http://localhost:5134/api/Rooms"),
-                    fetch("http://localhost:5134/api/admin/bookings?status=CONFIRMED", {
+                    fetch("http://localhost:5134/api/admin/bookings", {
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
-                            "Authorization": "Bearer " + workingToken
+                            "Authorization": "Bearer " + token
                         }
-                    })
+                    }),
+                    fetch("http://localhost:5134/api/User/alladmins", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        }
+                    }),
                 ]);
 
                 AdminApp.data.hotels = await hotelsRes.json();
                 AdminApp.data.rooms = await roomsRes.json();
                 AdminApp.data.bookings = await bookingsRes.json();
-                // AdminApp.data.users = JSON.parse(localStorage.getItem('users') || '[]');
+                AdminApp.data.users = await usersRes.json();
 
                 // Once loaded, update the UI
                 updateDashboardStats();
@@ -1411,19 +1410,27 @@
             }
         }
 
-        function saveDataToStorage() {
-            localStorage.setItem('hotels', JSON.stringify(AdminApp.data.hotels));
-            localStorage.setItem('hotelRooms', JSON.stringify(AdminApp.data.rooms));
-            localStorage.setItem('bookings', JSON.stringify(AdminApp.data.bookings));
-            localStorage.setItem('users', JSON.stringify(AdminApp.data.users));
-        }
-
         // Dashboard Stats
         function updateDashboardStats() {
-            const totalHotels = AdminApp.data.hotels.length;
-            const totalRooms = Object.values(AdminApp.data.rooms).reduce((sum, rooms) => sum + rooms.length, 0);
-            const pendingBookings = AdminApp.data.bookings.filter(b => b.status === 'pending').length;
-            const totalUsers = AdminApp.data.users.length;
+            // total hotels → already fine (API gives array)
+            const totalHotels = Array.isArray(AdminApp.data.hotels)
+                ? AdminApp.data.hotels.length
+                : 0;
+
+            // total rooms → API returns array, so just count it
+            const totalRooms = Array.isArray(AdminApp.data.rooms)
+                ? AdminApp.data.rooms.length
+                : 0;
+
+            // pending bookings → check status enum (1 = Pending)
+            const pendingBookings = Array.isArray(AdminApp.data.bookings)
+                ? AdminApp.data.bookings.filter(b => b.status === 1).length
+                : 0;
+
+            // total users → API should be an array
+            const totalUsers = Array.isArray(AdminApp.data.users)
+                ? AdminApp.data.users.length
+                : 0;
 
             document.getElementById('totalHotels').textContent = totalHotels;
             document.getElementById('totalRooms').textContent = totalRooms;
@@ -1438,10 +1445,8 @@
             loadHotelsTable();
             loadRoomsTable();
             loadUsersTable();
-            loadInventoryTable();
         }
 
-        // 🔑 Map numeric enum values → lowercase text
         const statusMap = {
             1: "pending",
             2: "confirmed",
@@ -1451,110 +1456,156 @@
         };
 
         function loadPendingBookingsTable() {
-            const tbody = document.getElementById('pendingBookingsTable');
+            const tbody = document.getElementById("pendingBookingsTable");
             if (!tbody) return;
 
-            // Collect only pending bookings
-            const pendingBookings = (AdminApp.data.bookings || []).filter(b => statusMap[b.status] === "pending");
+            // Grab only "pending" bookings (status = 1)
+            const pendingBookings = (AdminApp.data.bookings || []).filter(
+                b => b.status === 1 // BookingStatus.Pending
+            );
 
             if (pendingBookings.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No pending reservations</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="7" class="text-center">No pending reservations</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = pendingBookings.slice(0, 5).map(booking => {
-                const checkinDate = booking.checkIn ? new Date(booking.checkIn) : null;
-                const checkoutDate = booking.checkOut ? new Date(booking.checkOut) : null;
+            tbody.innerHTML = pendingBookings
+                .slice(0, 5) // show top 5
+                .map(booking => {
+                    const checkinDate = booking.checkIn
+                        ? new Date(booking.checkIn)
+                        : null;
+                    const checkoutDate = booking.checkOut
+                        ? new Date(booking.checkOut)
+                        : null;
 
-                return `
+                    return `
             <tr>
                 <td>${booking.id}</td>
-                <td>${booking.userId}</td>
-                <td>${booking.hotel?.name || 'Unknown'}</td>
-                <td>${booking.room?.name || 'Unknown'}</td>
+
+                <!-- ✅ Guest info -->
                 <td>
-                  ${checkinDate ? checkinDate.toLocaleDateString('en-GB') : '-'} -
-                  ${checkoutDate ? checkoutDate.toLocaleDateString('en-GB') : '-'}
+                  <strong>${booking.user?.username || "Unknown"}</strong><br>
+                  <small>${booking.user?.email || "No email"}</small><br>
+                  <small>${booking.user?.phone || ""}</small>
                 </td>
-                <td><span class="badge pending">Pending</span></td>
+
+                <!-- ✅ Hotel -->
                 <td>
-                    <button class="btn btn-success btn-sm mr-2" onclick="updateBookingStatus('${booking.id}', 2)">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="updateBookingStatus('${booking.id}', 3)">
-                        <i class="fas fa-times"></i>
-                    </button>
+                  <strong>${booking.hotel?.name || "Unknown"}</strong><br>
+                </td>
+
+                <td>
+                  ${checkinDate ? checkinDate.toLocaleDateString("en-GB") : "-"}
+                  -
+                  ${checkoutDate ? checkoutDate.toLocaleDateString("en-GB") : "-"}
+                </td>
+
+                <!-- Status badge -->
+                <td><span class="badge pending">Pending</span></td>
+
+                <!-- Actions -->
+                <td>
+                  <button class="btn btn-success btn-sm mr-2"
+                          onclick="updateBookingStatus('${booking.id}', 2)">
+                      <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn btn-danger btn-sm"
+                          onclick="updateBookingStatus('${booking.id}', 3)">
+                      <i class="fas fa-times"></i>
+                  </button>
                 </td>
             </tr>
-        `;
-            }).join('');
+            `;
+                })
+                .join("");
         }
 
         function loadAllBookingsTable() {
-            const tbody = document.getElementById('allBookingsTable');
+            const tbody = document.getElementById("allBookingsTable");
             if (!tbody) return;
 
             const bookingsList = AdminApp.data.bookings || [];
             if (bookingsList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center">No reservations found</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="8" class="text-center">No reservations found</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = bookingsList.map(booking => {
-                const checkinDate = booking.checkIn ? new Date(booking.checkIn) : null;
-                const checkoutDate = booking.checkOut ? new Date(booking.checkOut) : null;
-                const nights = booking.nights ?? (
-                    checkinDate && checkoutDate
-                        ? Math.ceil((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24))
-                        : 0
-                );
-                const total = booking.totalPrice ?? (booking.room?.basePrice * nights) ?? 0;
+            tbody.innerHTML = bookingsList
+                .map(booking => {
+                    const checkinDate = booking.checkIn
+                        ? new Date(booking.checkIn)
+                        : null;
+                    const checkoutDate = booking.checkOut
+                        ? new Date(booking.checkOut)
+                        : null;
 
-                // convert enum → string
-                const statusText = statusMap[booking.status] || "unknown";
+                    const nights =
+                        booking.nights ??
+                        (checkinDate && checkoutDate
+                            ? Math.ceil(
+                                (checkoutDate - checkinDate) /
+                                (1000 * 60 * 60 * 24)
+                            )
+                            : 0);
 
-                let actions = '';
-                if (statusText === "pending") {
-                    actions = `
-                <button class="btn btn-success btn-sm mr-2" 
-                        onclick="updateBookingStatus('${booking.id}', 2)" title="Confirm">
-                    <i class="fas fa-check"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" 
-                        onclick="updateBookingStatus('${booking.id}', 3)" title="Reject">
-                    <i class="fas fa-times"></i>
-                </button>
+                    const total =
+                        booking.totalPrice ??
+                        (booking.room?.basePrice * nights) ??
+                        0;
+
+                    // status is numeric enum, convert
+                    const statusText = statusMap[booking.status] || "unknown";
+
+                    // 🔧 Build actions
+                    let actions = "-"; // default = dash
+                    if (statusText === "pending") {
+                        actions = `
+                    <button class="btn btn-success btn-sm mr-2"
+                            onclick="updateBookingStatus('${booking.id}', 2)" 
+                            title="Confirm">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm"
+                            onclick="updateBookingStatus('${booking.id}', 3)" 
+                            title="Reject">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                    }
+
+                    return `
+                <tr>
+                  <td>${booking.id}</td>
+
+                  <!-- ✅ Guest info -->
+                  <td>
+                    <strong>${booking.user?.username || "Unknown"}</strong><br>
+                    <small>${booking.user?.email || "No email"}</small><br>
+                    <small>${booking.user?.phone || ""}</small>
+                  </td>
+
+                  <!-- ✅ Hotel & Room -->
+                  <td>
+                    <strong>${booking.hotel?.name || "Unknown"}</strong><br>
+                    <small>${booking.room?.name || "Unknown"}</small>
+                  </td>
+
+                  <!-- ✅ Dates -->
+                  <td>
+                    ${checkinDate ? checkinDate.toLocaleDateString("en-GB") : "-"} <br>
+                    <small>${checkoutDate ? "to " + checkoutDate.toLocaleDateString("en-GB") : ""}</small>
+                  </td>
+
+                  <td>${total}</td>
+                  <td><span class="badge ${statusText}">${statusText}</span></td>
+                  <td>${actions}</td>
+                </tr>
             `;
-                } else if (statusText === "confirmed") {
-                    actions = `
-                <button class="btn btn-danger btn-sm" 
-                        onclick="updateBookingStatus('${booking.id}', 4)" title="Cancel">
-                    <i class="fas fa-ban"></i>
-                </button>
-            `;
-                }
-
-                return `
-            <tr>
-                <td>${booking.id}</td>
-                <td>
-                    <strong>${booking.userId}</strong>
-                </td>
-                <td>
-                    <strong>${booking.hotel?.name || 'Unknown'}</strong><br>
-                    <small>${booking.room?.name || 'Unknown'}</small>
-                </td>
-                <td>
-                  ${checkinDate ? checkinDate.toLocaleDateString('en-GB') : '-'}<br>
-                  <small>${checkoutDate ? "to " + checkoutDate.toLocaleDateString('en-GB') : ''}</small>
-                </td>
-                <td>${booking.guests || '-'}</td>
-                <td>${total}</td>
-                <td><span class="badge ${statusText}">${statusText}</span></td>
-                <td>${actions}</td>
-            </tr>
-        `;
-            }).join('');
+                })
+                .join("");
         }
 
         function loadHotelsTable() {
@@ -1659,7 +1710,7 @@
             tbody.innerHTML = AdminApp.data.users.map(user => `
                 <tr>
                     <td>${user.id}</td>
-                    <td><strong>${user.name}</strong></td>
+                    <td><strong>${user.username}</strong></td>
                     <td>${user.email}</td>
                     <td>${user.phone || 'N/A'}</td>
                     <td>User</td>
@@ -1673,75 +1724,48 @@
             `).join('');
         }
 
-        function loadInventoryTable() {
-            const tbody = document.getElementById('inventoryTable');
-            if (!tbody) return;
-
-            const roomsArray = AdminApp.data.rooms;
-
-            if (!Array.isArray(roomsArray) || roomsArray.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No inventory data found</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = roomsArray.map(room => {
-                const hotel = AdminApp.data.hotels.find(h => h.id == room.hotelId);
-                return `
-              <tr>
-                <td>${hotel?.name || 'Unknown'}</td>
-                <td>${room.name}</td>
-                <td>${room.isAvailable ? room.capacity : 0}</td>
-                <td>${room.capacity}</td>
-                <td><span class="badge ${room.isAvailable ? 'available' : 'fully-booked'}">
-                  ${room.isAvailable ? 'Available' : 'Fully Booked'}
-                </span></td>
-                <td>
-                  <button class="btn btn-primary btn-sm" onclick="updateInventory('${room.hotelId}', '${room.id}')">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                </td>
-              </tr>
-                `;
-            }).join('');
-        }
         // Booking Management
-        function updateBookingStatus(bookingId, newStatus) {
-            const booking = AdminApp.data.bookings.find(b => b.id === bookingId);
-            if (!booking) return;
-
-            const oldStatus = booking.status;
-            booking.status = newStatus;
-
-            // Handle room availability updates
-            if (oldStatus === 'pending' && newStatus === 'confirmed') {
-                // Reduce available room count
-                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
-                if (room) {
-                    room.availableCount = (room.availableCount || 0) - 1;
-                    if (room.availableCount <= 0) {
-                        room.availability = 'fully-booked';
-                    }
-                }
-            } else if (oldStatus === 'confirmed' && newStatus === 'cancelled') {
-                // Restore available room count
-                const room = AdminApp.data.rooms[booking.hotelId]?.find(r => r.id == booking.roomId);
-                if (room) {
-                    room.availableCount = (room.availableCount || 0) + 1;
-                    room.availability = 'available';
-                }
-            }
-
-            saveDataToStorage();
-            updateDashboardStats();
-            loadAllTables();
-
-            const statusMessages = {
-                confirmed: 'Booking confirmed successfully',
-                rejected: 'Booking rejected',
-                cancelled: 'Booking cancelled'
+        async function updateBookingStatus(bookingId, newStatus) {
+            const statusActionMap = {
+                2: "confirm",
+                3: "reject",
+                5: "complete"
             };
+            try {
+                const action = statusActionMap[newStatus];
+                if (!action) {
+                    console.error("❌ Unsupported status:", newStatus);
+                    return;
+                }
 
-            showToast(statusMessages[newStatus] || 'Status updated', 'success');
+                const token = getAccessToken();
+                const url = `http://localhost:5134/api/admin/bookings/${bookingId}/${action}`;
+
+                const response = await fetch(url, {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to update booking");
+                }
+
+                // ✅ Update local data for instant UI feedback
+                const booking = AdminApp.data.bookings.find(b => b.id === bookingId);
+                if (booking) {
+                    booking.status = newStatus;
+                }
+
+                showToast(`Booking ${action}ed successfully`, "success");
+                updateDashboardStats();
+                loadAllTables();
+
+            } catch (err) {
+                console.error("❌ Error updating booking:", err);
+                showToast("Failed to update booking", "error");
+            }
         }
 
         // Hotel Management
@@ -1779,70 +1803,136 @@
         }
 
         function editHotel(hotelId) {
-            openHotelModal(hotelId);
+            const hotel = AdminApp.data.hotels.find(h => h.id === hotelId);
+            if (!hotel) return;
+
+            document.getElementById("hotelModalTitle").textContent = "Edit Hotel";
+            AdminApp.currentEditId = hotelId;
+            AdminApp.currentEditType = "hotel";
+
+            // Prefill fields
+            document.getElementById("hotelName").value = hotel.name || "";
+            document.getElementById("hotelCity").value = hotel.city || "";
+            document.getElementById("hotelAddress").value = hotel.address || "";
+            document.getElementById("hotelDescription").value = hotel.description || "";
+
+            // ✅ Update status badge
+            const statusEl = document.getElementById("hotelImageStatus");
+            if (hotel.thumbnailUrl) {
+                statusEl.textContent =
+                    "✅ Current image is set. Choose a new one if you want to replace it.";
+                statusEl.className = "image-status has-image";
+            } else {
+                statusEl.textContent = "⚠️ No image currently set for this hotel.";
+                statusEl.className = "image-status no-image";
+            }
+
+            // Reset file input
+            document.getElementById("hotelImage").value = "";
+
+            showModal("hotelModal");
         }
 
-        function deleteHotel(hotelId) {
-            if (!confirm('Are you sure you want to delete this hotel? This will also delete all its rooms and affect existing bookings.')) {
+        async function deleteHotel(hotelId) {
+            if (!confirm('Are you sure you want to delete this hotel? This will also delete all its rooms and reservations.')) {
                 return;
             }
 
-            // Remove hotel
-            AdminApp.data.hotels = AdminApp.data.hotels.filter(h => h.id !== hotelId);
+            try {
+                const token = getAccessToken();
 
-            // Remove hotel rooms
-            delete AdminApp.data.rooms[hotelId];
+                // 1️⃣ Call backend API
+                const response = await fetch(`http://localhost:5134/api/Hotels/admin/${hotelId}`, {
+                    method: "DELETE",
+                    headers: {"Authorization": "Bearer " + token}
+                });
 
-            // Update affected bookings
-            AdminApp.data.bookings.forEach(booking => {
-                if (booking.hotelId == hotelId && ['pending', 'confirmed'].includes(booking.status)) {
-                    booking.status = 'cancelled';
+                if (!response.ok) {
+                    throw new Error(`Failed to delete hotel (status: ${response.status})`);
                 }
-            });
 
-            saveDataToStorage();
-            updateDashboardStats();
-            loadAllTables();
-            populateHotelSelects();
-            showToast('Hotel deleted successfully', 'success');
+                // 2️⃣ Remove hotel + rooms locally
+                AdminApp.data.hotels = AdminApp.data.hotels.filter(h => h.id !== hotelId);
+
+                if (Array.isArray(AdminApp.data.rooms)) {
+                    AdminApp.data.rooms = AdminApp.data.rooms.filter(r => r.hotelId !== hotelId);
+                } else {
+                    delete AdminApp.data.rooms[hotelId];
+                }
+
+                // 3️⃣ ❌ Remove ALL bookings linked to this hotel
+                AdminApp.data.bookings = AdminApp.data.bookings.filter(b => b.hotelId !== hotelId);
+
+                // 4️⃣ Refresh UI
+                updateDashboardStats();
+                loadAllTables();
+                populateHotelSelects();
+                showToast("Hotel and related reservations deleted successfully", "success");
+
+            } catch (err) {
+                console.error("❌ Error deleting hotel:", err);
+                showToast("Failed to delete hotel", "error");
+            }
         }
 
-        function handleHotelSubmit(e) {
+        async function handleHotelSubmit(e) {
             e.preventDefault();
 
-            const formData = {
-                name: document.getElementById('hotelName').value,
-                location: document.getElementById('hotelLocation').value,
-                price: parseInt(document.getElementById('hotelPrice').value),
-                rating: parseFloat(document.getElementById('hotelRating').value),
-                reviews: parseInt(document.getElementById('hotelReviews').value),
-                image: document.getElementById('hotelImage').value,
-                features: document.getElementById('hotelFeatures').value.split(',').map(f => f.trim())
-            };
+            const name = document.getElementById("hotelName").value;
+            const city = document.getElementById("hotelCity").value;
+            const address = document.getElementById("hotelAddress").value;
+            const description = document.getElementById("hotelDescription").value;
 
-            if (AdminApp.currentEditId && AdminApp.currentEditType === 'hotel') {
-                // Update existing hotel
-                const hotelIndex = AdminApp.data.hotels.findIndex(h => h.id === AdminApp.currentEditId);
-                if (hotelIndex !== -1) {
-                    AdminApp.data.hotels[hotelIndex] = {...AdminApp.data.hotels[hotelIndex], ...formData};
-                    showToast('Hotel updated successfully', 'success');
-                }
-            } else {
-                // Add new hotel
-                const newHotel = {
-                    id: Date.now(),
-                    ...formData
-                };
-                AdminApp.data.hotels.push(newHotel);
-                AdminApp.data.rooms[newHotel.id] = []; // Initialize empty rooms array
-                showToast('Hotel added successfully', 'success');
+            const fileInput = document.getElementById("hotelImage");
+
+            const formData = new FormData();
+            if (fileInput.files.length > 0) {
+                formData.append("Image", fileInput.files[0]);
             }
 
-            saveDataToStorage();
-            updateDashboardStats();
-            loadAllTables();
-            populateHotelSelects();
-            hideModal('hotelModal');
+            try {
+                const token = getAccessToken();
+                let url = "http://localhost:5134/api/Hotels/admin";
+                let method = "POST";
+
+                if (AdminApp.currentEditId && AdminApp.currentEditType === "hotel") {
+                    // include fields in query string
+                    const params = new URLSearchParams({
+                        Name: name,
+                        City: city,
+                        Address: address,
+                        Description: description
+                    });
+                    url = `http://localhost:5134/api/Hotels/admin/${AdminApp.currentEditId}?${params}`;
+                    method = "PUT";
+                }
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {Authorization: "Bearer " + token},
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error("Hotel save failed: " + errText);
+                }
+
+                await loadData();
+                showToast(
+                    AdminApp.currentEditId
+                        ? "Hotel updated successfully!"
+                        : "Hotel added successfully!",
+                    "success"
+                );
+                hideModal("hotelModal");
+                document.getElementById("hotelForm").reset();
+                AdminApp.currentEditId = null;
+                AdminApp.currentEditType = null;
+            } catch (err) {
+                console.error("❌ Hotel save error:", err);
+                showToast("Failed to save hotel", "error");
+            }
         }
 
         // Room Management
@@ -1868,7 +1958,9 @@
                 document.getElementById('roomPrice').value = room.price;
                 document.getElementById('roomAvailable').value = room.availableCount || 0;
                 document.getElementById('roomImage').value = room.image;
-                document.getElementById('roomFeatures').value = room.features.join(', ');
+                document.getElementById("roomDescription").value =
+                    room.description ? room.description : "";
+
             } else {
                 // Add mode
                 title.textContent = 'Add New Room';
@@ -1882,76 +1974,135 @@
         }
 
         function editRoom(hotelId, roomId) {
-            openRoomModal(hotelId, roomId);
-        }
+            const room = Array.isArray(AdminApp.data.rooms)
+                ? AdminApp.data.rooms.find(r => r.id === roomId)
+                : (AdminApp.data.rooms[hotelId] || []).find(r => r.id === roomId);
 
-        function deleteRoom(hotelId, roomId) {
-            if (!confirm('Are you sure you want to delete this room? This will affect existing bookings.')) {
+            if (!room) {
+                console.error("❌ No room found with id", roomId);
                 return;
             }
 
-            // Remove room
-            AdminApp.data.rooms[hotelId] = AdminApp.data.rooms[hotelId].filter(r => r.id != roomId);
-
-            // Update affected bookings
-            AdminApp.data.bookings.forEach(booking => {
-                if (booking.hotelId == hotelId && booking.roomId == roomId && ['pending', 'confirmed'].includes(booking.status)) {
-                    booking.status = 'cancelled';
-                }
-            });
-
-            saveDataToStorage();
-            updateDashboardStats();
-            loadAllTables();
-            showToast('Room deleted successfully', 'success');
-        }
-
-        function handleRoomSubmit(e) {
-            e.preventDefault();
-
-            const hotelId = document.getElementById('roomHotel').value;
-            const formData = {
-                name: document.getElementById('roomName').value,
-                type: document.getElementById('roomType').value,
-                price: parseInt(document.getElementById('roomPrice').value),
-                availableCount: parseInt(document.getElementById('roomAvailable').value),
-                image: document.getElementById('roomImage').value,
-                features: document.getElementById('roomFeatures').value.split(',').map(f => f.trim())
-            };
-
-            // Set availability based on count
-            formData.availability = formData.availableCount > 0 ? 'available' : 'fully-booked';
-            formData.totalCapacity = formData.availableCount + 2; // Set total capacity
-
-            if (AdminApp.currentEditId && AdminApp.currentEditType === 'room') {
-                // Update existing room
-                const roomIndex = AdminApp.data.rooms[AdminApp.currentEditHotelId].findIndex(r => r.id == AdminApp.currentEditId);
-                if (roomIndex !== -1) {
-                    AdminApp.data.rooms[AdminApp.currentEditHotelId][roomIndex] = {
-                        ...AdminApp.data.rooms[AdminApp.currentEditHotelId][roomIndex],
-                        ...formData
-                    };
-                    showToast('Room updated successfully', 'success');
-                }
-            } else {
-                // Add new room
-                const newRoom = {
-                    id: Date.now(),
-                    number: String(Date.now()).slice(-3), // Last 3 digits as room number
-                    ...formData
-                };
-
-                if (!AdminApp.data.rooms[hotelId]) {
-                    AdminApp.data.rooms[hotelId] = [];
-                }
-                AdminApp.data.rooms[hotelId].push(newRoom);
-                showToast('Room added successfully', 'success');
+            const modal = document.getElementById("roomModal");
+            if (!modal) {
+                console.error("❌ Room modal not in DOM!");
+                return;
             }
 
-            saveDataToStorage();
-            updateDashboardStats();
-            loadAllTables();
-            hideModal('roomModal');
+            document.getElementById("roomModalTitle").textContent = "Edit Room";
+            AdminApp.currentEditId = roomId;
+            AdminApp.currentEditType = "room";
+
+            // ✅ safe lookups
+            const hotelSel = document.getElementById("roomHotel");
+            const typeSel = document.getElementById("roomType");
+            const priceInput = document.getElementById("roomPrice");
+            const descInput = document.getElementById("roomDescription");
+
+            if (hotelSel) hotelSel.value = hotelId;
+            if (typeSel) typeSel.value = room.name;        // enum value
+            if (priceInput) priceInput.value = room.basePrice;
+            if (descInput) descInput.value = room.description ?? "";
+
+            showModal("roomModal");
+        }
+
+        async function deleteRoom(hotelId, roomId) {
+            if (!confirm('Are you sure you want to delete this room? This will also delete its reservations.')) {
+                return;
+            }
+
+            try {
+                const token = getAccessToken();
+
+                // 1️⃣ Call backend API
+                const response = await fetch(`http://localhost:5134/api/Rooms/admin/${roomId}`, {
+                    method: "DELETE",
+                    headers: {"Authorization": "Bearer " + token}
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to delete room (status: ${response.status})`);
+                }
+
+                // 2️⃣ Remove room locally
+                if (Array.isArray(AdminApp.data.rooms)) {
+                    AdminApp.data.rooms = AdminApp.data.rooms.filter(r => r.id !== roomId);
+                } else {
+                    AdminApp.data.rooms[hotelId] = (AdminApp.data.rooms[hotelId] || []).filter(r => r.id !== roomId);
+                }
+
+                // 3️⃣ ❌ Remove ALL bookings linked to this hotel+room combo
+                AdminApp.data.bookings = AdminApp.data.bookings.filter(
+                    b => !(b.hotelId === hotelId && b.roomId === roomId)
+                );
+
+                // 4️⃣ Refresh UI
+                updateDashboardStats();
+                loadAllTables();
+                showToast("Room and related reservations deleted successfully", "success");
+
+            } catch (err) {
+                console.error("❌ Error deleting room:", err);
+                showToast("Failed to delete room", "error");
+            }
+        }
+
+        async function handleRoomSubmit(e) {
+            e.preventDefault();
+
+            const hotelId = document.getElementById("roomHotel").value;
+            const roomType = parseInt(document.getElementById("roomType").value, 10);
+            const basePrice = parseFloat(document.getElementById("roomPrice").value);
+            const description = document.getElementById("roomDescription").value || null;
+
+            const payload = {
+                hotelId,
+                name: roomType,
+                basePrice,
+                description,
+                isAvailable: true // Always true when created/edited
+            };
+
+            try {
+                const token = getAccessToken();
+                let url = "http://localhost:5134/api/Rooms/admin";
+                let method = "POST";
+
+                if (AdminApp.currentEditId && AdminApp.currentEditType === "room") {
+                    url = `http://localhost:5134/api/Rooms/admin/${AdminApp.currentEditId}`;
+                    method = "PUT";
+                }
+
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        Authorization: "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error("Room save failed: " + errText);
+                }
+
+                await loadData();
+                showToast(
+                    AdminApp.currentEditId
+                        ? "Room updated successfully!"
+                        : "Room added successfully!",
+                    "success"
+                );
+                hideModal("roomModal");
+                document.getElementById("roomForm").reset();
+                AdminApp.currentEditId = null;
+                AdminApp.currentEditType = null;
+            } catch (err) {
+                console.error("❌ Room save error:", err);
+                showToast("Failed to save room", "error");
+            }
         }
 
         // User Management
@@ -1970,7 +2121,6 @@
                 }
             });
 
-            saveDataToStorage();
             updateDashboardStats();
             loadAllTables();
             showToast('User deleted successfully', 'success');
@@ -1992,7 +2142,6 @@
                 room.availableCount = count;
                 room.availability = count > 0 ? 'available' : 'fully-booked';
 
-                saveDataToStorage();
                 loadAllTables();
                 showToast('Inventory updated successfully', 'success');
             }
@@ -2069,148 +2218,6 @@
             document.getElementById('toast')?.classList.remove('show');
         }
 
-        // Initialize with mock data if none exists
-        function initializeMockData() {
-            if (AdminApp.data.hotels.length === 0) {
-                // Add sample data
-                AdminApp.data.hotels = [
-                    {
-                        id: 1,
-                        name: 'The Ritz Carlton',
-                        location: 'Cairo, Egypt',
-                        price: 250,
-                        rating: 4.8,
-                        reviews: 324,
-                        image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-                        features: ['Free WiFi', 'Pool', 'Breakfast Included', 'Parking']
-                    },
-                    {
-                        id: 2,
-                        name: 'Four Seasons Hotel',
-                        location: 'Dubai, UAE',
-                        price: 180,
-                        rating: 4.6,
-                        reviews: 198,
-                        image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-                        features: ['Spa', 'Private Beach', 'Multiple Restaurants', 'Room Service']
-                    }
-                ];
-
-                AdminApp.data.rooms = {
-                    1: [
-                        {
-                            id: 101,
-                            name: "Deluxe King Room",
-                            number: "101",
-                            type: "King Room",
-                            price: 250,
-                            availability: "available",
-                            availableCount: 3,
-                            totalCapacity: 5,
-                            image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-                            features: ["King Size Bed", "City View", "Mini Bar", "Free WiFi", "Air Conditioning"]
-                        }
-                    ],
-                    2: [
-                        {
-                            id: 201,
-                            name: "Ocean View Room",
-                            number: "201",
-                            type: "Ocean View",
-                            price: 180,
-                            availability: "available",
-                            availableCount: 2,
-                            totalCapacity: 4,
-                            image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-                            features: ["Ocean View", "Balcony", "Private Beach Access", "Mini Bar", "Free WiFi"]
-                        }
-                    ]
-                };
-
-                AdminApp.data.bookings = [
-                    {
-                        id: 'booking-1',
-                        userId: 1001,
-                        hotelId: 1,
-                        roomId: 101,
-                        checkinDate: '2025-02-15',
-                        checkoutDate: '2025-02-20',
-                        guests: '2',
-                        notes: 'Late check-in expected',
-                        status: 'pending',
-                        pricePerNight: 250,
-                        createdAt: '2025-01-15T10:00:00.000Z'
-                    },
-                    {
-                        id: 'booking-2',
-                        userId: 1002,
-                        hotelId: 2,
-                        roomId: 201,
-                        checkinDate: '2025-03-01',
-                        checkoutDate: '2025-03-05',
-                        guests: '2',
-                        notes: '',
-                        status: 'confirmed',
-                        pricePerNight: 180,
-                        createdAt: '2025-01-10T14:30:00.000Z'
-                    }
-                ];
-
-                AdminApp.data.users = [
-                    {
-                        id: 1001,
-                        name: 'John Smith',
-                        email: 'john.smith@example.com',
-                        phone: '+1234567890',
-                        createdAt: '2025-01-01T10:00:00.000Z'
-                    },
-                    {
-                        id: 1002,
-                        name: 'Sarah Johnson',
-                        email: 'sarah.johnson@example.com',
-                        phone: '+1987654321',
-                        createdAt: '2025-01-05T14:30:00.000Z'
-                    }
-                ];
-
-                saveDataToStorage();
-            }
-        }
-
-        // Load data from main site localStorage if available
-        function syncWithMainSite() {
-            try {
-                const mainSiteHotels = JSON.parse(localStorage.getItem('hotels') || '[]');
-                const mainSiteRooms = JSON.parse(localStorage.getItem('hotelRooms') || '{}');
-                const mainSiteBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-                const mainSiteUsers = JSON.parse(localStorage.getItem('users') || '[]');
-
-                if (mainSiteHotels.length > 0) AdminApp.data.hotels = mainSiteHotels;
-                if (Object.keys(mainSiteRooms).length > 0) AdminApp.data.rooms = mainSiteRooms;
-                if (mainSiteBookings.length > 0) AdminApp.data.bookings = mainSiteBookings;
-                if (mainSiteUsers.length > 0) AdminApp.data.users = mainSiteUsers;
-
-                saveDataToStorage();
-            } catch (error) {
-                console.log('No main site data found, using mock data');
-                initializeMockData();
-            }
-        }
-
-        // Override saveDataToStorage to save to both admin and main site
-        function saveDataToStorage() {
-            // Save to admin storage
-            localStorage.setItem('admin-hotels', JSON.stringify(AdminApp.data.hotels));
-            localStorage.setItem('admin-rooms', JSON.stringify(AdminApp.data.rooms));
-            localStorage.setItem('admin-bookings', JSON.stringify(AdminApp.data.bookings));
-            localStorage.setItem('admin-users', JSON.stringify(AdminApp.data.users));
-
-            // Sync back to main site storage
-            localStorage.setItem('hotels', JSON.stringify(AdminApp.data.hotels));
-            localStorage.setItem('hotelRooms', JSON.stringify(AdminApp.data.rooms));
-            localStorage.setItem('bookings', JSON.stringify(AdminApp.data.bookings));
-            localStorage.setItem('users', JSON.stringify(AdminApp.data.users));
-        }
 
         console.log('🔧 Admin Dashboard initialized successfully!');
         console.log('📊 Features: Hotel/Room/User Management, Booking Approvals, Inventory Control');
