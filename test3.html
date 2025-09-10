@@ -1990,6 +1990,7 @@
         });
 
         function initializeApp() {
+            restoreSession();
             initTheme();
             initNavigation();
             initModals();
@@ -2499,6 +2500,24 @@
         function stopRefreshInterval() {
             if (refreshIntervalId) clearInterval(refreshIntervalId);
         }
+    // This runs when your app starts (e.g., in main.js or after DOMContentLoaded)
+    function restoreSession() {
+        const accessToken = localStorage.getItem("access_token");
+        const refreshToken = localStorage.getItem("refresh_token");
+
+        if (accessToken && refreshToken) {
+            console.log("🔑 Restoring session...");
+
+            // Optionally decode JWT for user info (instead of storing manually)
+            // For now, we just keep the name if you stored it in localStorage
+            App.currentUser = { name: localStorage.getItem("user_name") || "User" };
+
+            updateUIForAuthenticatedUser();
+            startRefreshInterval();
+        } else {
+            console.log("⚠️ No session found");
+        }
+    }
 
 async function handleLogin(e) {
     e.preventDefault();
@@ -2536,9 +2555,15 @@ async function handleLogin(e) {
             const data = await response.json();
             localStorage.setItem("access_token", data.result.accessToken)
             localStorage.setItem("refresh_token", data.result.refreshToken)
-            App.currentUser = { "name": data.result.name };
+            localStorage.setItem("user_name", data.result.name);
+            App.currentUser = { "name": data.result.name , "role": data.result.role };
             await refreshAccessToken(); // test first refresh
             startRefreshInterval();     // then keep refreshing
+            if (data.result.role == "Admin") {
+                localStorage.setItem('isAdmin', 'true');
+                window.location.href = 'admin_dashboard.html';
+                return;
+            }
             updateUIForAuthenticatedUser();
             hideModal(Elements.loginModal);
             showToast('Successfully signed in', 'success');
@@ -2552,25 +2577,7 @@ async function handleLogin(e) {
         console.log(err.message);
         errorDiv.innerHTML = "❌ Network error: " + err.message;
     }
-    if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-        localStorage.setItem('isAdmin', 'true');
-        window.location.href = 'admin_dashboard.html';
-        return;
-    }
-
-
-    if (email && password) {
-        App.currentUser = {
-            id: Date.now(),
-            name: 'John Smith',
-            email: email,
-            phone: '+1234567890'
-        };
-        updateUIForAuthenticatedUser();
-        hideModal(Elements.loginModal);
-        showToast('Successfully signed in', 'success');
-        e.target.reset();
-    }
+    
 }
 
         async function  handleRegister(e) {
@@ -2965,7 +2972,7 @@ async function handleLogin(e) {
                     if (response.ok) {
                         const data = await response.json();
                         localStorage.setItem("access_token", data.result.accessToken);
-                        localStorage.setItem("refresh_token", data.result.accessToken);
+                        localStorage.setItem("refresh_token", data.result.refreshToken);
                         console.log("✅ Access token refreshed:", data.result.accessToken);
                         return data.result.accessToken;
                     } else {
