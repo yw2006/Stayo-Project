@@ -843,7 +843,7 @@
                 </div>
                 <div class="nav-item"
                     style="margin-top: var(--space-8); border-top: 1px solid var(--border-color); padding-top: var(--space-4);">
-                    <a type="button" class="nav-link" id="homeLink" href="../test3.html">
+                    <a type="button" class="nav-link" id="homeLink" href="../index.html">
                         return to site
                     </a>
 
@@ -1213,8 +1213,8 @@
             try {
                 const response = await fetch("http://localhost:5134/api/Auth/refresh-token", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ refreshToken })
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({refreshToken})
                 });
 
                 if (response.ok) {
@@ -1406,7 +1406,7 @@
                 AdminApp.data.rooms = await roomsRes.json();
                 AdminApp.data.bookings = await bookingsRes.json();
                 AdminApp.data.admins = await adminsRes.json();
-                const { count } = await userCountRes.json();
+                const {count} = await userCountRes.json();
                 AdminApp.data.usercount = count;
 
                 // Once loaded, update the UI
@@ -1845,7 +1845,7 @@
                 // 1️⃣ Call backend API
                 const response = await fetch(`http://localhost:5134/api/Hotels/admin/${hotelId}`, {
                     method: "DELETE",
-                    headers: { "Authorization": "Bearer " + token }
+                    headers: {"Authorization": "Bearer " + token}
                 });
 
                 if (!response.ok) {
@@ -1910,7 +1910,7 @@
 
                 const res = await fetch(url, {
                     method,
-                    headers: { Authorization: "Bearer " + token },
+                    headers: {Authorization: "Bearer " + token},
                     body: formData
                 });
 
@@ -2019,7 +2019,7 @@
                 // 1️⃣ Call backend API
                 const response = await fetch(`http://localhost:5134/api/Rooms/admin/${roomId}`, {
                     method: "DELETE",
-                    headers: { "Authorization": "Bearer " + token }
+                    headers: {"Authorization": "Bearer " + token}
                 });
 
                 if (!response.ok) {
@@ -2221,7 +2221,7 @@
 
 
         console.log('🔧 Admin Dashboard initialized successfully!');
-        console.log('📊 Features: Hotel/Room/User Management, Booking Approvals, Inventory Control');
+        console.log('📊 Features: Hotel/Room/User Management, Booking Approvals, Inventory rol');
     </script>
 
 </body>

@@ -187,6 +187,19 @@
             list-style: none;
         }
 
+        .navbar-nav li {
+            list-style: none;
+            display: inline-flex;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar-nav .nav-link {
+            display: inline-block;
+            padding: var(--space-2) var(--space-4);
+        }
+
         .nav-link {
             color: var(--text-primary);
             text-decoration: none;
@@ -220,6 +233,41 @@
             display: flex;
             align-items: center;
             gap: var(--space-3);
+        }
+
+        /* Auth buttons in navbar */
+        .auth-buttons .btn {
+            padding: 6px 14px;
+            /* tighter */
+            font-size: var(--font-size-sm);
+            line-height: 1;
+            /* keep text centered */
+            min-height: auto;
+            border-radius: var(--radius);
+            /* match nav-link feel */
+        }
+
+        /* Make outline login look similar */
+        .auth-buttons .btn-outline {
+            border: 1px solid var(--border-color);
+        }
+
+        .auth-buttons .btn-outline:hover {
+            background: var(--surface-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        /* Primary Sign Up */
+        .auth-buttons .btn-primary {
+            padding: 6px 14px;
+            font-weight: 600;
+        }
+
+        .auth-buttons .btn-primary:hover {
+            transform: none;
+            box-shadow: none;
+            /* prevent jumping shadow in nav */
         }
 
         .btn {
@@ -403,6 +451,12 @@
             display: flex;
             align-items: center;
             gap: var(--space-3);
+        }
+
+        .user-menu .nav-link {
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
         }
 
         .user-avatar {
@@ -1767,7 +1821,7 @@
 
             </ul>
 
-            <div class="auth-buttons">
+            <div class="auth-buttons" id="authButtons">
                 <!-- Notifications -->
                 <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
                     <i class="fas fa-bell"></i>
@@ -1779,18 +1833,15 @@
                     <i class="fas fa-moon" id="themeIcon"></i>
                 </button>
 
-                <!-- Auth Buttons -->
-                <div class="auth-section" id="authSection">
-                    <a class="btn btn-outline" id="loginBtn">Sign In</a>
-                    <a class="btn btn-primary" id="registerBtn">Sign Up</a>
-                </div>
-
-                <!-- User Menu (Hidden by default) -->
-                <div class="user-menu hidden" id="userMenu">
-                    <!--the user data-->
+                <!-- Auth or User menu will be placed here -->
+                <div id="authContainer">
+                    <div class="auth-section" id="authSection">
+                        <a class="btn btn-outline" id="loginBtn">Sign In</a>
+                        <a class="btn btn-primary" id="registerBtn">Sign Up</a>
+                    </div>
+                    <div class="user-menu hidden" id="userMenu"></div>
                 </div>
             </div>
-
             <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
                 <i class="fas fa-bars"></i>
             </button>
@@ -1868,9 +1919,9 @@
         <section class="section">
             <div class="container">
                 <h2 class="section-title slide-in-left">Hotels</h2>
-                    <div class="hotels-grid" id="hotelsGrid">
-                        <!-- Hotels will be populated by JavaScript -->
-                    </div>
+                <div class="hotels-grid" id="hotelsGrid">
+                    <!-- Hotels will be populated by JavaScript -->
+                </div>
             </div>
         </section>
     </div>
@@ -2027,17 +2078,17 @@
                         <option value="5">5+ Guests</option>
                     </select>
                 </div>
-        <button type="submit" class="btn btn-primary btn-full">
-            <i class="fas fa-paper-plane"></i>
-            Submit Booking Request
-        </button>
-        <p
-            style="font-size: var(--font-size-sm); color: var(--text-secondary); text-align: center; margin-top: var(--space-4);">
-            Your booking request will be sent to the hotel for approval. You'll receive a confirmation within 24
-            hours.
-        </p>
-        </form>
-    </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit Booking Request
+                </button>
+                <p
+                    style="font-size: var(--font-size-sm); color: var(--text-secondary); text-align: center; margin-top: var(--space-4);">
+                    Your booking request will be sent to the hotel for approval. You'll receive a confirmation within 24
+                    hours.
+                </p>
+            </form>
+        </div>
     </div>
 
     <!-- Notification Toast -->
@@ -2644,22 +2695,23 @@
             if (accessToken && refreshToken) {
                 console.log("🔑 Restoring session...");
                 if (IsAdmin) {
-                    const li = document.createElement("li");
+                    const nav = document.querySelector(".navbar-nav");
 
-                    // Create <a>
-                    const a = document.createElement("a");
-                    a.href = './admin_dashboard.html';
-                    a.className = "nav-link";  // add class
-                    a.id = "navAdmin";       // add id
-                    a.textContent = "Admin Dashboard"; // add text
-
-                    // Append <a> into <li>
-                    li.appendChild(a);
-                    nav.appendChild(li);
+                    // Check if it's already there
+                    if (!document.getElementById("navAdmin")) {
+                        const li = document.createElement("li");
+                        li.innerHTML = `
+                          <a href="./admin_dashboard.html" class="nav-link" id="navAdmin">
+                            <i class="fas fa-shield-alt"></i> Admin Dashboard
+                          </a>
+                        `;
+                        nav.appendChild(li);
+                    }
                 }
+
                 // Optionally decode JWT for user info (instead of storing manually)
                 // For now, we just keep the name if you stored it in localStorage
-                App.currentUser = { name: localStorage.getItem("user_name") || "User" };
+                App.currentUser = {name: localStorage.getItem("user_name") || "User"};
 
                 updateUIForAuthenticatedUser();
                 startRefreshInterval();
@@ -2705,7 +2757,7 @@
                     localStorage.setItem("access_token", data.result.accessToken)
                     localStorage.setItem("refresh_token", data.result.refreshToken)
                     localStorage.setItem("user_name", data.result.name);
-                    App.currentUser = { "name": data.result.name, "role": data.result.role };
+                    App.currentUser = {"name": data.result.name, "role": data.result.role};
                     await refreshAccessToken(); // test first refresh
                     startRefreshInterval();     // then keep refreshing
                     if (data.result.role == "Admin") {
@@ -2775,7 +2827,7 @@
                     localStorage.setItem("access_token", data.result.accessToken)
                     localStorage.setItem("refresh_token", data.result.refreshToken)
                     localStorage.setItem("user_name", data.result.name)
-                    App.currentUser = { "name": data.result.name };
+                    App.currentUser = {"name": data.result.name};
                     setInterval(refreshAccessToken, 10 * 60 * 1000);
                     updateUIForAuthenticatedUser();
                     hideModal(Elements.registerModal);
@@ -2792,9 +2844,33 @@
             }
         }
 
+        function handleLogout() {
+            // stop refresh job
+            stopRefreshInterval();
 
+            // Clear tokens & session
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("user_name");
+            localStorage.removeItem("isAdmin");
 
+            App.currentUser = null;
 
+            // Reset UI
+            if (Elements.userMenu) {
+                Elements.userMenu.classList.add("hidden");
+                Elements.userMenu.innerHTML = "";
+            }
+
+            if (Elements.authSection) {
+                Elements.authSection.classList.remove("hidden");
+            }
+
+            showToast("Logged out successfully", "success");
+
+            // Return to home page
+            showPage("home");
+        }
 
         async function handleBookingRequest(e) {
             e.preventDefault();
@@ -2865,24 +2941,29 @@
         }
 
         function updateUIForAuthenticatedUser() {
-            if (Elements.authSection) {
-                Elements.authSection.classList.add('hidden');
-            }
+            if (App.currentUser) {
+                Elements.authSection.classList.add("hidden");
+                Elements.userMenu.classList.remove("hidden");
 
-            if (Elements.userMenu) {
-                Elements.userMenu.classList.remove('hidden');
-                if (App.currentUser) {
-                    Elements.userMenu.innerHTML = `
-                    <div class="user-avatar">
-                        <i class="fas fa-user-circle"></i>
-                        <span>Hi, ${App.currentUser.name}</span>
-                    </div>`;
-                }
-            }
+                Elements.userMenu.innerHTML = `
+                  <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Hi, ${App.currentUser.name}</span>
+                  </div>
+                  <a href="#" class="nav-link" id="logoutLink">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                  </a>
+                `;
 
-            updateNotificationBadge();
+                document.getElementById("logoutLink")?.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    handleLogout();
+                });
+            } else {
+                Elements.userMenu.classList.add("hidden");
+                Elements.authSection.classList.remove("hidden");
+            }
         }
-
         // Search functionality
         function initSearch() {
             const today = new Date();
@@ -3033,7 +3114,7 @@
 
                     const response = await fetch(`http://localhost:5134/api/HotelSearch/search?${params}`, {
                         method: "GET",
-                        headers: { "Content-Type": "application/json" }
+                        headers: {"Content-Type": "application/json"}
                     });
 
                     if (!response.ok) {
@@ -3236,7 +3317,7 @@
             const card = document.createElement('div');
             card.className = 'hotel-card fade-in';
 
-            const starsHtml = Array.from({ length: 5 }, (_, i) => {
+            const starsHtml = Array.from({length: 5}, (_, i) => {
                 const starClass = i < Math.floor(hotel.rating) ? 'fas fa-star star' : 'far fa-star star';
                 return `<i class="${starClass}"></i>`;
             }).join('');
@@ -3337,7 +3418,7 @@
         // Performance monitoring
         window.addEventListener('load', () => {
             const loadTime = performance.now();
-            trackEvent('page_loaded', { loadTime: Math.round(loadTime) });
+            trackEvent('page_loaded', {loadTime: Math.round(loadTime)});
         });
 
         // Simulate admin approval of bookings (for demo purposes)
