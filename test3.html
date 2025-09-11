@@ -1867,12 +1867,7 @@
         <!-- Popular Hotels Section -->
         <section class="section">
             <div class="container">
-                <<<<<<< HEAD <h2 class="section-title slide-in-left">Hotels</h2>
-
-                    =======
-                    <h2 class="section-title slide-in-left">Popular Hotels</h2>
-
-                    >>>>>>> 8ff0a420549ddb503b7fcb7053597fed956bda9e
+                <h2 class="section-title slide-in-left">Hotels</h2>
                     <div class="hotels-grid" id="hotelsGrid">
                         <!-- Hotels will be populated by JavaScript -->
                     </div>
@@ -2032,12 +2027,6 @@
                         <option value="5">5+ Guests</option>
                     </select>
                 </div>
-                <<<<<<< HEAD=======<div class="form-group">
-                    <label for="bookingNotes" class="form-label">Special Requests (Optional)</label>
-                    <textarea id="bookingNotes" class="form-input" rows="3"
-                        placeholder="Any special requests or notes..."></textarea>
-        </div>
-        >>>>>>> 8ff0a420549ddb503b7fcb7053597fed956bda9e
         <button type="submit" class="btn btn-primary btn-full">
             <i class="fas fa-paper-plane"></i>
             Submit Booking Request
@@ -2785,6 +2774,7 @@
                     const data = await response.json();
                     localStorage.setItem("access_token", data.result.accessToken)
                     localStorage.setItem("refresh_token", data.result.refreshToken)
+                    localStorage.setItem("user_name", data.result.name)
                     App.currentUser = { "name": data.result.name };
                     setInterval(refreshAccessToken, 10 * 60 * 1000);
                     updateUIForAuthenticatedUser();
