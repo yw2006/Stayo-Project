@@ -703,6 +703,16 @@
             gap: var(--space-2);
         }
 
+        .btn-info {
+            background: var(--info-color);
+            color: var(--white);
+        }
+
+        .btn-info:hover {
+            background: #2563eb;
+            /* darker blue */
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -1566,22 +1576,31 @@
                     const statusText = statusMap[booking.status] || "unknown";
 
                     // 🔧 Build actions
-                    let actions = "-"; // default = dash
+                    // 🔧 Build actions
+                    let actions = "-"; // default
+
                     if (statusText === "pending") {
                         actions = `
-                    <button class="btn btn-success btn-sm mr-2"
-                            onclick="updateBookingStatus('${booking.id}', 2)" 
-                            title="Confirm">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm"
-                            onclick="updateBookingStatus('${booking.id}', 3)" 
-                            title="Reject">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
+    <button class="btn btn-success btn-sm mr-2"
+            onclick="updateBookingStatus('${booking.id}', 2)" 
+            title="Confirm">
+      <i class="fas fa-check"></i>
+    </button>
+    <button class="btn btn-danger btn-sm"
+            onclick="updateBookingStatus('${booking.id}', 3)" 
+            title="Reject">
+      <i class="fas fa-times"></i>
+    </button>`;
                     }
-
+                    // ✅ Add this block for confirmed bookings
+                    else if (statusText === "confirmed") {
+                        actions = `
+    <button class="btn btn-info btn-sm"
+            onclick="updateBookingStatus('${booking.id}', 5)" 
+            title="Mark as Completed">
+      <i class="fas fa-flag-checkered"></i>
+    </button>`;
+                    }
                     return `
                 <tr>
                   <td>${booking.id}</td>
