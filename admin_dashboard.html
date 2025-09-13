@@ -1902,10 +1902,14 @@
             const city = document.getElementById("hotelCity").value;
             const address = document.getElementById("hotelAddress").value;
             const description = document.getElementById("hotelDescription").value;
-
             const fileInput = document.getElementById("hotelImage");
 
             const formData = new FormData();
+            formData.append("Name", name);
+            formData.append("City", city);
+            formData.append("Address", address);
+            formData.append("Description", description);
+
             if (fileInput.files.length > 0) {
                 formData.append("Image", fileInput.files[0]);
             }
@@ -1915,21 +1919,15 @@
                 let url = "http://localhost:5134/api/Hotels/admin";
                 let method = "POST";
 
+                // if editing hotel
                 if (AdminApp.currentEditId && AdminApp.currentEditType === "hotel") {
-                    // include fields in query string
-                    const params = new URLSearchParams({
-                        Name: name,
-                        City: city,
-                        Address: address,
-                        Description: description
-                    });
-                    url = `http://localhost:5134/api/Hotels/admin/${AdminApp.currentEditId}?${params}`;
+                    url = `http://localhost:5134/api/Hotels/admin/${AdminApp.currentEditId}`;
                     method = "PUT";
                 }
 
                 const res = await fetch(url, {
                     method,
-                    headers: {Authorization: "Bearer " + token},
+                    headers: {"Authorization": "Bearer " + token},
                     body: formData
                 });
 
@@ -1945,6 +1943,7 @@
                         : "Hotel added successfully!",
                     "success"
                 );
+
                 hideModal("hotelModal");
                 document.getElementById("hotelForm").reset();
                 AdminApp.currentEditId = null;
